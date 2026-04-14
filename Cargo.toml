@@ -1,0 +1,14 @@
+[package]
+name = "shelly"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.6.0", features = ["derive"] }
+confy = "2.0.0"
+dialoguer = { version = "0.12.0", features = ["completion", "fuzzy-matcher", "fuzzy-select", "history"] }
+serde = "1.0.228"
+serde_derive = "1.0.228"
+tokio = { version = "1", features = ["full"] }
+async-openai = "0.23.0"
+indicatif = "0.17"
