@@ -1,8 +1,27 @@
 use std::error::Error;
+use std::fs::{OpenOptions};
+use std::io::{Write};
 
 use dialoguer::{Confirm, Input, Password, Select, console::Style, theme::ColorfulTheme};
 
 use crate::config::{Config, Shell};
+
+const ZSH_WRAPPER: &str = r#"shelly() {
+    local cmd
+    cmd=$(command shelly "$@")
+    if [[ -n "$cmd" ]]; then
+        print -z "$cmd"
+    fi
+}"#;
+
+const BASH_WRAPPER: &str = r#"shelly() {
+    local cmd
+    cmd=$(command shelly "$@")
+    if [[ -n "$cmd" ]]; then
+        bind "\" \e[0n\": \"$cmd\""
+        printf '\e[5n'
+    fi
+}"#;
 
 // Init the tool in the users system
 pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
@@ -19,12 +38,12 @@ pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
         return Ok(None);
     }
 
-    let model = Input::with_theme(&theme)
+    let model: String = Input::with_theme(&theme)
         .with_prompt("AI Model")
         .default("gemma4:31b".parse().unwrap())
         .interact()?;
 
-    let api_url = Input::with_theme(&theme)
+    let api_url: String = Input::with_theme(&theme)
         .with_prompt("AI Api Endpoint")
         .default("http://127.0.0.1".parse().unwrap())
         .interact()?;
@@ -41,15 +60,45 @@ pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
         .interact()?;
 
     let shell = match shell_selection {
-        0 => Some(Shell::Bash),
-        1 => Some(Shell::Zsh),
-        _ => Some(Shell::Bash)
+        0 => Shell::Bash,
+        1 => Shell::Zsh,
+        _ => Shell::Bash,
     };
+
+    // Shell Integration
+    let (config_file, wrapper) = match shell {
+        Shell::Bash => {
+            let mut path = dirs::home_dir().ok_or("Could not find home directory")?;
+            path.push(".bashrc");
+            (path, BASH_WRAPPER)
+        }
+        Shell::Zsh => {
+            let mut path = dirs::home_dir().ok_or("Could not find home directory")?;
+            path.push(".zshrc");
+            (path, ZSH_WRAPPER)
+        }
+    };
+
+    println!("\nProposed shell wrapper:\n{}", wrapper);
+
+    if Confirm::with_theme(&theme)
+        .with_prompt(&format!("Would you like to add this to your {:?}?", config_file))
+        .interact()?
+    {
+        let mut file = OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(&config_file)?;
+
+        writeln!(file, "# shelly\n{}\n# shelly end\n", wrapper)?;
+        println!("Shell integration added successfully!");
+        println!("")
+    }
 
     Ok(Some(Config {
         model,
         api_url,
         api_key,
-        shell
+        shell: Some(shell),
     }))
 }

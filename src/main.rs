@@ -25,18 +25,18 @@ fn main() {
     match &cli.command {
         Commands::Setup {} => {
             match commands::setup::setup() {
-                Ok(cfg) => {
-                    let new_cfg = cfg.unwrap();
+                Ok(Some(new_cfg)) => {
                     match confy::store(
                         APP_NAME,
                         CONFIG_NAME,
                         new_cfg
                     ) {
                         Ok(_) => println!("All done!"),
-                        Err(_) => println!("Init failed")
+                        Err(_) => eprintln!("Config save failed")
                     }
                 }
-                Err(_err) => eprint!("Init failed")
+                Ok(None) => println!("Setup cancelled."),
+                Err(_err) => eprintln!("Setup failed")
             }
         }
     }
