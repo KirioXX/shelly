@@ -1,17 +1,22 @@
 mod config;
 mod commands;
 
+use std::error::Error;
+
 use clap::{Parser, Subcommand};
 
-const APP_NAME: &str = "shelly";
-const CONFIG_NAME: &str = "config";
+pub const APP_NAME: &str = "shelly";
+pub const CONFIG_NAME: &str = "config";
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
-    command: Commands
+    command: Option<Commands>,
+
+    #[arg(trailing_var_arg = true)]
+    prompt: Vec<String>, // Capture any extra arguments
 }
 
 #[derive(Debug, Subcommand)]
@@ -19,11 +24,12 @@ enum Commands {
     Setup {},
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Setup {} => {
+        Some(Commands::Setup {}) => {
             match commands::setup::setup() {
                 Ok(Some(new_cfg)) => {
                     match confy::store(
@@ -38,6 +44,13 @@ fn main() {
                 Ok(None) => println!("Setup cancelled."),
                 Err(_err) => eprintln!("Setup failed")
             }
+        },
+        None {} => {
+            match commands::ai::call(cli.prompt).await {
+                Ok(_) => println!("Got a result"),
+                Err(err) => println!("Failed: {:?}", err)
+            }
         }
     }
+    Ok(())
 }

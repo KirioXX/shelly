@@ -1576,6 +1576,7 @@ dependencies = [
  "indicatif",
  "serde",
  "serde_derive",
+ "serde_json",
  "tokio",
 ]
 
