@@ -1,7 +1,11 @@
 use std::error::Error;
 use crate::{APP_NAME, CONFIG_NAME};
 use crate::config::{Config};
-use async_openai::types::{CreateCompletionRequestArgs};
+use async_openai::types::{
+    ChatCompletionRequestSystemMessageArgs,
+    ChatCompletionRequestUserMessageArgs,
+    CreateChatCompletionRequestArgs
+};
 use async_openai::{
     config::OpenAIConfig,
     Client,
@@ -20,19 +24,31 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
   let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
   let client = get_client(&cfg.api_key, &cfg.api_url);
 
-  // Setup Request
-  let request = CreateCompletionRequestArgs::default()
+  let request = CreateChatCompletionRequestArgs::default()
+        .max_tokens(512u32)
         .model(cfg.model)
-        .prompt(prompt)
+        .messages([
+            ChatCompletionRequestSystemMessageArgs::default()
+                .content("You are a helpful assistant.")
+                .build()?
+                .into(),
+            ChatCompletionRequestUserMessageArgs::default()
+                .content(prompt.join(" "))
+                .build()?
+                .into(),
+        ])
         .build()?;
 
     println!("{}", serde_json::to_string(&request).unwrap());
 
-    let response = client.completions().create(request).await?;
+    let response = client.chat().create(request).await?;
 
-    println!("\nResponse (multiple):\n");
+    println!("\nResponse:\n");
     for choice in response.choices {
-        println!("{}", choice.text);
+        println!(
+            "{}: Role: {}  Content: {:?}",
+            choice.index, choice.message.role, choice.message.content
+        );
     }
 
   Ok("".into())

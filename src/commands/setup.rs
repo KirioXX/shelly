@@ -40,12 +40,12 @@ pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
 
     let model: String = Input::with_theme(&theme)
         .with_prompt("AI Model")
-        .default("gemma4:31b".parse().unwrap())
+        .default("gemma4:31b-cloud".parse().unwrap())
         .interact()?;
 
     let api_url: String = Input::with_theme(&theme)
         .with_prompt("AI Api Endpoint")
-        .default("http://127.0.0.1".parse().unwrap())
+        .default("https://ollama.com/v1".parse().unwrap())
         .interact()?;
 
     let api_key = Password::with_theme(&theme)
