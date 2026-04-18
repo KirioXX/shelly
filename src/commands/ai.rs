@@ -60,9 +60,6 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
         ])
         .build()?;
 
-    eprintln!("{}", style("AI Request:").cyan().bold());
-    eprintln!("{}", style(serde_json::to_string_pretty(&request).unwrap()).dim());
-
     let pb = ProgressBar::new_spinner();
     pb.set_style(
         ProgressStyle::default_spinner()
