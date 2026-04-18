@@ -1704,6 +1704,7 @@ dependencies = [
  "async-openai",
  "clap",
  "confy",
+ "console 0.15.11",
  "dialoguer",
  "dirs",
  "handlebars",

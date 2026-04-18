@@ -1,6 +1,8 @@
 use std::error::Error;
 use std::collections::BTreeMap;
+use console::style;
 use handlebars::Handlebars;
+use indicatif::{ProgressBar, ProgressStyle};
 use crate::{APP_NAME, CONFIG_NAME};
 use crate::config::{Config};
 use async_openai::types::{
@@ -58,20 +60,24 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
         ])
         .build()?;
 
-    eprintln!("{}", serde_json::to_string(&request).unwrap());
+    eprintln!("{}", style("AI Request:").cyan().bold());
+    eprintln!("{}", style(serde_json::to_string_pretty(&request).unwrap()).dim());
+
+    let pb = ProgressBar::new_spinner();
+    pb.set_style(
+        ProgressStyle::default_spinner()
+            .template("{spinner:.green} {msg}")?
+            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ "),
+    );
+    pb.set_message("Thinking...");
+    pb.enable_steady_tick(std::time::Duration::from_millis(100));
 
     let response = client.chat().create(request).await?;
 
+    pb.finish_and_clear();
+
     if response.choices.is_empty() {
         return Err("AI returned no response. Please try again.".into());
-    }
-
-    eprintln!("\nResponse:\n");
-    for choice in &response.choices {
-        eprintln!(
-            "{}: Role: {}  Content: {:?}",
-            choice.index, choice.message.role, choice.message.content
-        );
     }
 
     // Extract the command from the first choice
@@ -85,6 +91,8 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
     if command.is_empty() {
         return Err("AI returned empty command. Please try with a different prompt.".into());
     }
+
+    eprintln!("{}", style("✓ Command generated").green().bold());
 
     Ok(command)
 }
