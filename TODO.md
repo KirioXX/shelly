@@ -7,13 +7,13 @@
   - ~~Move "Response:" header to stderr~~
   - ~~Move role/index metadata to stderr~~
   
-- [ ] Improve system prompt for shell command generation
-  - Change from "You are a helpful assistant" to shell-specific prompt
-  - Add instruction to return only the command, no explanations
+- [x] Improve system prompt for shell command generation
+  - ~~Change from "You are a helpful assistant" to shell-specific prompt~~
+  - ~~Add instruction to return only the command, no explanations~~
   
-- [ ] Extract clean command from AI response
-  - Remove the Role/Content metadata printing
-  - Return just `choice.message.content` as clean string
+- [x] Extract clean command from AI response
+  - ~~Remove the Role/Content metadata printing~~
+  - ~~Return just `choice.message.content` as clean string~~
   
 - [ ] Proper error handling for AI calls
   - Handle empty responses

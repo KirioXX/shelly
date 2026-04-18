@@ -11,6 +11,8 @@ use async_openai::{
     Client,
 };
 
+const SYSTEM_PROMPT: &str = include_str!("prompts/system-prompt.md");
+
 fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
   Client::with_config(
         OpenAIConfig::new()
@@ -29,7 +31,7 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
         .model(cfg.model)
         .messages([
             ChatCompletionRequestSystemMessageArgs::default()
-                .content("You are a helpful assistant.")
+                .content(SYSTEM_PROMPT)
                 .build()?
                 .into(),
             ChatCompletionRequestUserMessageArgs::default()
