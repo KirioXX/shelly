@@ -22,11 +22,16 @@ fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
 }
 
 pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
-  // Setup
-  let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
-  let client = get_client(&cfg.api_key, &cfg.api_url);
+    // Setup
+    let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
+    
+    if cfg.api_key.is_empty() {
+        return Err("API key not configured. Run 'shelly setup' first.".into());
+    }
+    
+    let client = get_client(&cfg.api_key, &cfg.api_url);
 
-  let request = CreateChatCompletionRequestArgs::default()
+    let request = CreateChatCompletionRequestArgs::default()
         .max_tokens(512u32)
         .model(cfg.model)
         .messages([
@@ -45,6 +50,10 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
 
     let response = client.chat().create(request).await?;
 
+    if response.choices.is_empty() {
+        return Err("AI returned no response. Please try again.".into());
+    }
+
     eprintln!("\nResponse:\n");
     for choice in &response.choices {
         eprintln!(
@@ -57,9 +66,13 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
     let command = response.choices
         .first()
         .and_then(|choice| choice.message.content.clone())
-        .unwrap_or_default()
+        .ok_or("AI returned empty content")?
         .trim()
         .to_string();
+
+    if command.is_empty() {
+        return Err("AI returned empty command. Please try with a different prompt.".into());
+    }
 
     Ok(command)
 }

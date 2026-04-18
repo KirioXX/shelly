@@ -5,7 +5,7 @@ A Rust-based terminal assistant that translates natural language prompts into sh
 ## 🚀 Features
 
 - **Natural Language to Command**: Describe what you want to do, and Shelly gives you the exact command.
-- **Direct Buffer Injection**: Instead of just printing a command, Shelly can inject it directly into your shell's prompt (via `print -z` in Zsh or `bind` in Bash), so you can review and edit it before hitting Enter.
+- **Direct Buffer Injection**: Instead of just printing a command, Shelly can inject it directly into your shell's prompt (via `print -z` in Zsh, `bind` in Bash, or `commandline -r` in Fish), so you can review and edit it before hitting Enter.
 - **Zero-Leak Output**: Uses a strict `stdout`/`stderr` split. AI reasoning and spinners go to `stderr`, while only the final executable command goes to `stdout`.
 - **Interactive Setup**: A guided wizard to configure your AI provider and shell integration.
 
@@ -21,11 +21,13 @@ mv target/release/shelly /usr/local/bin/shelly
 ```bash
 shelly setup
 ```
-The wizard will collect your API key, preferred model, and set up the necessary shell wrapper in your `.zshrc` or `.bashrc`.
+The wizard will collect your API key, preferred model, and set up the necessary shell wrapper in your `.zshrc`, `.bashrc`, or `config.fish`.
 
 ### 3. Restart your shell
 ```bash
-source ~/.zshrc # or ~/.bashrc
+source ~/.zshrc  # for Zsh
+source ~/.bashrc  # for Bash
+source ~/.config/fish/config.fish  # for Fish
 ```
 
 ## 📖 Usage

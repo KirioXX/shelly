@@ -15,17 +15,17 @@
   - ~~Remove the Role/Content metadata printing~~
   - ~~Return just `choice.message.content` as clean string~~
   
-- [ ] Proper error handling for AI calls
-  - Handle empty responses
-  - Handle API errors
-  - Handle missing config
+- [x] Proper error handling for AI calls
+  - ~~Handle empty responses~~
+  - ~~Handle API errors~~
+  - ~~Handle missing config~~
 
 ## 📚 Documentation
 
-- [ ] Update README with Fish shell support
-  - Add Fish to the list of supported shells
-  - Add Fish setup instructions
-  - Update installation section
+- [x] Update README with Fish shell support
+  - ~~Add Fish to the list of supported shells~~
+  - ~~Add Fish setup instructions~~
+  - ~~Update installation section~~
 
 ## 🛠️ Future Enhancements
 
