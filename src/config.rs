@@ -4,7 +4,8 @@ use clap::{ValueEnum};
 #[derive(Debug, Serialize, Deserialize, Clone, ValueEnum)]
 pub enum Shell {
   Bash,
-  Zsh
+  Zsh,
+  Fish
 }
 
 #[derive(Debug, Serialize, Deserialize)]

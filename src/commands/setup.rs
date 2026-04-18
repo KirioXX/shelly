@@ -6,22 +6,9 @@ use dialoguer::{Confirm, Input, Password, Select, console::Style, theme::Colorfu
 
 use crate::config::{Config, Shell};
 
-const ZSH_WRAPPER: &str = r#"shelly() {
-    local cmd
-    cmd=$(command shelly "$@")
-    if [[ -n "$cmd" ]]; then
-        print -z "$cmd"
-    fi
-}"#;
-
-const BASH_WRAPPER: &str = r#"shelly() {
-    local cmd
-    cmd=$(command shelly "$@")
-    if [[ -n "$cmd" ]]; then
-        bind "\" \e[0n\": \"$cmd\""
-        printf '\e[5n'
-    fi
-}"#;
+const BASH_WRAPPER: &str = include_str!("scripts/bash.sh");
+const ZSH_WRAPPER: &str = include_str!("scripts/zsh.sh");
+const FISH_WRAPPER: &str = include_str!("scripts/fish.sh");
 
 // Init the tool in the users system
 pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
@@ -57,11 +44,13 @@ pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
         .default(0)
         .item("Bash")
         .item("Zsh")
+        .item("Fish")
         .interact()?;
 
     let shell = match shell_selection {
         0 => Shell::Bash,
         1 => Shell::Zsh,
+        2 => Shell::Fish,
         _ => Shell::Bash,
     };
 
@@ -76,6 +65,11 @@ pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
             let mut path = dirs::home_dir().ok_or("Could not find home directory")?;
             path.push(".zshrc");
             (path, ZSH_WRAPPER)
+        }
+        Shell::Fish => {
+            let mut path = dirs::home_dir().ok_or("Could not find home directory")?;
+            path.push(".config/fish/config.fish");
+            (path, FISH_WRAPPER)
         }
     };
 
