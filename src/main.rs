@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         },
         None {} => {
             match commands::ai::call(cli.prompt).await {
-                Ok(_) => println!("Got a result"),
+                Ok(command) => println!("{}", command),
                 Err(err) => println!("Failed: {:?}", err)
             }
         }
