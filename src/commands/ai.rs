@@ -1,4 +1,6 @@
 use std::error::Error;
+use std::collections::BTreeMap;
+use handlebars::Handlebars;
 use crate::{APP_NAME, CONFIG_NAME};
 use crate::config::{Config};
 use async_openai::types::{
@@ -11,7 +13,8 @@ use async_openai::{
     Client,
 };
 
-const SYSTEM_PROMPT: &str = include_str!("prompts/system-prompt.md");
+
+const SYSTEM_PROMPT_TEMPLATE: &str = include_str!("prompts/system-prompt.md");
 
 fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
   Client::with_config(
@@ -24,11 +27,20 @@ fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
 pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
     // Setup
     let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
-    
+
     if cfg.api_key.is_empty() {
         return Err("API key not configured. Run 'shelly setup' first.".into());
     }
-    
+
+    // Build system prompt with OS and shell info
+    let handlebars = Handlebars::new();
+    let mut data = BTreeMap::new();
+    data.insert("os", std::env::consts::OS);
+    let shell_str = cfg.shell.as_ref().map(|s| s.to_string()).unwrap_or_else(|| "unknown".to_string());
+    data.insert("shell", shell_str.as_str());
+
+    let system_prompt = handlebars.render_template(SYSTEM_PROMPT_TEMPLATE, &data)?;
+
     let client = get_client(&cfg.api_key, &cfg.api_url);
 
     let request = CreateChatCompletionRequestArgs::default()
@@ -36,7 +48,7 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
         .model(cfg.model)
         .messages([
             ChatCompletionRequestSystemMessageArgs::default()
-                .content(SYSTEM_PROMPT)
+                .content(&system_prompt)
                 .build()?
                 .into(),
             ChatCompletionRequestUserMessageArgs::default()

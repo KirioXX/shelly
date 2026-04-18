@@ -1,11 +1,22 @@
 use serde_derive::{Serialize, Deserialize};
 use clap::{ValueEnum};
+use std::fmt;
 
 #[derive(Debug, Serialize, Deserialize, Clone, ValueEnum)]
 pub enum Shell {
   Bash,
   Zsh,
   Fish
+}
+
+impl fmt::Display for Shell {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Shell::Bash => write!(f, "Bash"),
+            Shell::Zsh => write!(f, "Zsh"),
+            Shell::Fish => write!(f, "Fish"),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
