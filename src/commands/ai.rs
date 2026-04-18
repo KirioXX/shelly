@@ -39,17 +39,25 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
         ])
         .build()?;
 
-    println!("{}", serde_json::to_string(&request).unwrap());
+    eprintln!("{}", serde_json::to_string(&request).unwrap());
 
     let response = client.chat().create(request).await?;
 
-    println!("\nResponse:\n");
-    for choice in response.choices {
-        println!(
+    eprintln!("\nResponse:\n");
+    for choice in &response.choices {
+        eprintln!(
             "{}: Role: {}  Content: {:?}",
             choice.index, choice.message.role, choice.message.content
         );
     }
 
-  Ok("".into())
+    // Extract the command from the first choice
+    let command = response.choices
+        .first()
+        .and_then(|choice| choice.message.content.clone())
+        .unwrap_or_default()
+        .trim()
+        .to_string();
+
+    Ok(command)
 }
