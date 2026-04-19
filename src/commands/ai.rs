@@ -55,7 +55,7 @@ fn get_system_prompt(full_prompt: &String, cfg: &Config) -> Result<String, Box<d
     Ok(system_prompt)
 }
 
-pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
+pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn Error>> {
     // Setup
     let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
 
@@ -114,7 +114,17 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
         return Err("AI returned empty command. Please try with a different prompt.".into());
     }
 
-    eprintln!("{}", style("✓ Command generated").green().bold());
-
-    Ok(command)
+    if dry_run {
+        eprintln!("{}", style("🔍 Dry run - Command:").yellow().bold());
+        eprintln!("```");
+        eprintln!("{}", style(&command).cyan());
+        eprintln!("```");
+        eprintln!();
+        eprintln!("{}", style("✓ Command generated (not executed)").green().bold());
+        Ok(String::new())  // Return empty so shell doesn't inject
+    } else {
+        eprintln!("{}", style("✓ Command generated").green().bold());
+        // Command goes to stdout for shell injection, no extra formatting needed
+        Ok(command)
+    }
 }

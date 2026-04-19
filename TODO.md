@@ -2,9 +2,9 @@
 
 ## 🎯 Ready for Implementation
 
-- [ ] **Dry-run mode** (`--dry-run` flag)
-  - Show command without injecting it
-  - Useful for testing AI responses before running
+- [x] **Dry-run mode** (`--dry-run` flag)
+  - ~~Show command without injecting it~~
+  - ~~Useful for testing AI responses before running~~
   
 - [ ] **Shell completion generation** (`--completions <shell>`)
   - Generate completion scripts for Bash/Zsh/Fish

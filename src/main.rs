@@ -16,6 +16,9 @@ struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
 
+    #[arg(long, help = "Show command without executing")]
+    dry_run: bool,
+
     #[arg(trailing_var_arg = true)]
     prompt: Vec<String>, // Capture any extra arguments
 }
@@ -47,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         },
         None {} => {
-            match commands::ai::call(cli.prompt).await {
+            match commands::ai::call(cli.prompt, cli.dry_run).await {
                 Ok(command) => println!("{}", command),
                 Err(err) => println!("Failed: {:?}", err)
             }
