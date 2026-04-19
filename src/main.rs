@@ -1,5 +1,6 @@
 mod config;
 mod commands;
+mod skills;
 
 use std::error::Error;
 

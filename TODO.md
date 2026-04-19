@@ -1,41 +1,55 @@
 # Shelly TODO
 
-## 🎯 Core Functionality
+## 🎯 Ready for Implementation
 
-- [x] Fix AI output to stdout (only command should go to stdout)
-  - ~~Move debug JSON output to stderr~~
-  - ~~Move "Response:" header to stderr~~
-  - ~~Move role/index metadata to stderr~~
+- [ ] **Dry-run mode** (`--dry-run` flag)
+  - Show command without injecting it
+  - Useful for testing AI responses before running
   
-- [x] Improve system prompt for shell command generation
-  - ~~Change from "You are a helpful assistant" to shell-specific prompt~~
-  - ~~Add instruction to return only the command, no explanations~~
+- [ ] **Shell completion generation** (`--completions <shell>`)
+  - Generate completion scripts for Bash/Zsh/Fish
+  - Users can pipe to their shell config
+
+- [x] **Enable skills** (shelly-specific in `~/.config/shelly/skills/`)
+  - ~~Create skill discovery and loading system~~
+  - ~~Match prompts to skills by keywords in description~~
+  - ~~Prepend skill instructions to system prompt~~
+  - Installed: `curl-command-generator` (copied from Pi skills)
   
-- [x] Extract clean command from AI response
-  - ~~Remove the Role/Content metadata printing~~
-  - ~~Return just `choice.message.content` as clean string~~
-  
-- [x] Proper error handling for AI calls
-  - ~~Handle empty responses~~
-  - ~~Handle API errors~~
-  - ~~Handle missing config~~
+- [ ] **Setup tools** (e.g. web search, file reading)
+  - Tool definitions for the AI (web search, read file, etc.)
+  - Let AI decide when to use tools
 
-## 📚 Documentation
+## 🛠️ Future Enhancements (after testing)
 
-- [x] Update README with Fish shell support
-  - ~~Add Fish to the list of supported shells~~
-  - ~~Add Fish setup instructions~~
-  - ~~Update installation section~~
+- [ ] **Support multiple skills** in one session
+- [ ] **Manual skill selection** (`--skill <name>` flag)
+- [ ] **Skill install command**: `shelly skill add <url>`
 
-## 🛠️ Future Enhancements
+## 🚀 Future Ideas
 
-- [ ] Add command history/undo
-- [ ] Support for more AI providers (Anthropic, Gemini, etc.)
-- [ ] Add dry-run mode (show command without injecting)
-- [ ] Shell completion for the CLI itself
-- [ ] Add tests
+- [ ] **Command history**
+  - Store generated commands with timestamps
+  - `shelly history` to list, `shelly undo` or replay
+
+- [ ] **Add tests**
+  - Unit tests for shell detection
+  - Tests for AI response parsing
+  - Mock API responses for testing
+
+- [ ] **Multi-turn conversations**
+  - `shelly --chat` for back-and-forth refinement
+  - Context from previous commands
+
+- [ ] **Configuration editing**
+  - `shelly config` to view/edit settings
+  - Change model without re-running setup
 
 ## ✅ Completed
 
-- [x] Add Fish shell support
+- [x] Fish shell support
 - [x] Move shell scripts to external files with `include_str!`
+- [x] System prompt with OS/shell context
+- [x] Proper stdout/stderr split
+- [x] Pixel spinner and styled output
+- [x] Error handling for edge cases

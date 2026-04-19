@@ -5,6 +5,7 @@ use handlebars::Handlebars;
 use indicatif::{ProgressBar, ProgressStyle};
 use crate::{APP_NAME, CONFIG_NAME};
 use crate::config::{Config};
+use crate::skills::SkillManager;
 use async_openai::types::{
     ChatCompletionRequestSystemMessageArgs,
     ChatCompletionRequestUserMessageArgs,
@@ -26,13 +27,15 @@ fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
     )
 }
 
-pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
-    // Setup
-    let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
-
-    if cfg.api_key.is_empty() {
-        return Err("API key not configured. Run 'shelly setup' first.".into());
-    }
+fn get_system_prompt(full_prompt: &String, cfg: &Config) -> Result<String, Box<dyn Error>> {
+    // Check for matching skill
+    let skill_manager = SkillManager::new()?;
+    let skill_instruction = if let Some(skill) = skill_manager.find_matching_skill(&full_prompt)? {
+        eprintln!("{}", style(format!("📚 Using skill: {}", skill.name)).cyan());
+        Some(skill.content)
+    } else {
+        None
+    };
 
     // Build system prompt with OS and shell info
     let handlebars = Handlebars::new();
@@ -41,20 +44,42 @@ pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
     let shell_str = cfg.shell.as_ref().map(|s| s.to_string()).unwrap_or_else(|| "unknown".to_string());
     data.insert("shell", shell_str.as_str());
 
-    let system_prompt = handlebars.render_template(SYSTEM_PROMPT_TEMPLATE, &data)?;
+    let mut system_prompt = handlebars.render_template(SYSTEM_PROMPT_TEMPLATE, &data)?;
+
+    // Append skill instructions if found
+    if let Some(instruction) = skill_instruction {
+        system_prompt.push_str("\n\n# Skill Context\n\n");
+        system_prompt.push_str(&instruction);
+    }
+
+    Ok(system_prompt)
+}
+
+pub async fn call(prompt: Vec<String>) -> Result<String, Box<dyn Error>> {
+    // Setup
+    let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
+
+    if cfg.api_key.is_empty() {
+        return Err("API key not configured. Run 'shelly setup' first.".into());
+    }
+
+    let full_prompt = prompt.join(" ");
+    let system_prompt = match get_system_prompt(&full_prompt, &cfg) {
+        Ok(sp) => sp,
+        Err(_err) => "".to_string(),
+    };
 
     let client = get_client(&cfg.api_key, &cfg.api_url);
-
     let request = CreateChatCompletionRequestArgs::default()
         .max_tokens(512u32)
         .model(cfg.model)
         .messages([
             ChatCompletionRequestSystemMessageArgs::default()
-                .content(&system_prompt)
+                .content(system_prompt)
                 .build()?
                 .into(),
             ChatCompletionRequestUserMessageArgs::default()
-                .content(prompt.join(" "))
+                .content(full_prompt)
                 .build()?
                 .into(),
         ])
