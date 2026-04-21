@@ -1,6 +1,8 @@
 function shelly
-    # Check if first arg is a valid subcommand (not a prompt)
-    if test -n "$argv[1]" && command shelly cmds | grep -qx "$argv[1]"
+    # Check if first arg is a valid subcommand or help/version flag
+    set -l valid_subcommand (command shelly cmds | grep -qx "$argv[1]" 2>/dev/null; echo $status)
+    set -l is_help (string match -r "^(-h|--help|-V|--version)$" "$argv[1]" 2>/dev/null; echo $status)
+    if test -n "$argv[1]" -a "$valid_subcommand" -eq 0 -o "$is_help" -eq 0
         command shelly $argv
         return $status
     end

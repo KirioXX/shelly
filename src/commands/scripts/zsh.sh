@@ -1,6 +1,6 @@
 shelly() {
-    # Check if first arg is a valid subcommand (not a prompt)
-    if [[ -n "$1" ]] && command shelly cmds | grep -qx "$1"; then
+    # Check if first arg is a valid subcommand or help/version flag
+    if [[ -n "$1" ]] && { command shelly cmds | grep -qx "$1" || [[ "$1" =~ ^(-h|--help|-V|--version)$ ]]; }; then
         command shelly "$@"
         return $?
     fi
