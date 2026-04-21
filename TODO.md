@@ -26,6 +26,7 @@
 - [ ] **Manual skill selection** (`--skill <name>` flag)
 - [ ] **Skill install command**: `shelly skill add <url>`
 - [ ] **Automatic skill installation**: discover and install missing skills on demand
+- [ ] **Migrate AI call to dedicated subcommand**: Create `shelly generate <prompt>` for core command generation, separate from setup/main entry point (fixes logging issues, makes setup more robust)
 
 ## 🚀 Future Ideas
 
