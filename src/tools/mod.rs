@@ -67,3 +67,73 @@ pub use web_search::WebSearch;
 
 pub mod read_file;
 pub use read_file::ReadFile;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    struct MockTool {
+        name: String,
+    }
+
+    #[async_trait]
+    impl Tool for MockTool {
+        fn name(&self) -> &str {
+            &self.name
+        }
+
+        fn description(&self) -> &str {
+            "A mock tool for testing"
+        }
+
+        fn parameters(&self) -> Value {
+            json!({"type": "object", "properties": {}})
+        }
+
+        async fn execute(&self, _args: Value) -> Result<String, Box<dyn std::error::Error>> {
+            Ok(format!("Executed {}", self.name))
+        }
+    }
+
+    #[test]
+    fn test_tool_registry_new() {
+        let registry = ToolRegistry::new();
+        assert!(registry.get("test").is_none());
+    }
+
+    #[test]
+    fn test_tool_registry_register_and_get() {
+        let mut registry = ToolRegistry::new();
+        registry.register(MockTool { name: "test_tool".to_string() });
+        
+        let tool = registry.get("test_tool");
+        assert!(tool.is_some());
+        assert_eq!(tool.unwrap().name(), "test_tool");
+    }
+
+    #[test]
+    fn test_tool_registry_get_nonexistent() {
+        let registry = ToolRegistry::new();
+        assert!(registry.get("nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_tool_registry_to_function_definitions() {
+        let mut registry = ToolRegistry::new();
+        registry.register(MockTool { name: "tool1".to_string() });
+        registry.register(MockTool { name: "tool2".to_string() });
+        
+        let defs = registry.to_function_definitions();
+        assert_eq!(defs.len(), 2);
+    }
+
+    #[tokio::test]
+    async fn test_mock_tool_execution() {
+        let tool = MockTool { name: "test".to_string() };
+        let result = tool.execute(json!({})).await;
+        
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), "Executed test");
+    }
+}
