@@ -4,202 +4,61 @@ A Rust-based terminal assistant that translates natural language prompts into sh
 
 ## 🚀 Features
 
-- **Natural Language to Command**: Describe what you want to do, and Shelly gives you the exact command.
-- **Smart Skill Matching**: Automatically detects when to use specialized skills (like generating cURL commands) and applies expert guidance.
-- **Direct Buffer Injection**: Instead of just printing a command, Shelly can inject it directly into your shell's prompt (via `print -z` in Zsh, `bind` in Bash, or `commandline -r` in Fish), so you can review and edit it before hitting Enter.
-- **Context-Aware**: Knows your OS and shell type to generate appropriate commands.
-- **Zero-Leak Output**: Uses a strict `stdout`/`stderr` split. AI reasoning and spinners go to `stderr`, while only the final executable command goes to `stdout`.
-- **Interactive Setup**: A guided wizard to configure your AI provider and shell integration.
+- **Natural Language to Command**: Describe what you want, get the exact command
+- **Direct Buffer Injection**: Commands appear in your shell for review before running
+- **AI Tools**: Web search, file reading, automatic clarification for better context
+- **Smart Skill Matching**: Expert guidance for specific tasks (curl, docker, etc.)
+- **Shell Completions**: Tab completion for Bash, Zsh, Fish
+- **Zero-Leak Output**: Only the command goes to stdout
 
-## 🛠️ Installation
+## Quick Start
 
-### 1. Build the binary
+### Installation
+
 ```bash
+# Clone and build
 cargo build --release
-mv target/release/shelly /usr/local/bin/shelly
+just install  # Or: cp target/release/shelly ~/.cargo/bin/
 ```
 
-### 2. Run the setup wizard
+### Setup
+
 ```bash
 shelly setup
-```
-The wizard will collect your API key, preferred model, and set up the necessary shell wrapper in your `.zshrc`, `.bashrc`, or `config.fish`.
-
-### 3. Restart your shell
-```bash
-source ~/.zshrc  # for Zsh
-source ~/.bashrc  # for Bash
-source ~/.config/fish/config.fish  # for Fish
+# Follow the wizard to configure your AI provider and shell
 ```
 
-### Build from source with `just`
-
-We use [`just`](https://github.com/casey/just) for common development tasks:
+### Usage
 
 ```bash
-# Install just
-cargo install just
-
-# See all available commands
-just
+shelly generate "list all docker containers"
+shelly generate --dry-run "delete old log files"
 ```
 
-Available recipes:
-
-| Command | Description |
-|---------|-------------|
-| `just build` | Build release binary |
-| `just install` | Build and install to cargo's bin directory (`$CARGO_HOME/bin`) |
-| `just check` | Quick cargo check |
-| `just lint` | Run clippy |
-| `just test` | Run tests |
-| `just run -- <args>` | Dev build and run with arguments |
-
-## 📖 Usage
-
-Simply describe the command you need:
+## Development
 
 ```bash
-shelly generate "list all docker containers running on port 8080"
-shelly generate "find all files larger than 100MB in the current directory"
-shelly generate "git commit all changes with the message 'fix: resolve bug #123'"
+just          # See all available commands
+just build    # Build release binary  
+just test     # Run tests
 ```
 
-### Dry-Run Mode
+## Documentation
 
-Preview commands before executing them:
+- [📖 Usage Guide](docs/usage.md) - Complete usage documentation
+- [🎯 Skills](docs/skills.md) - Skills system documentation  
+- [🔧 AI Tools](docs/usage.md#ai-tools) - Web search, file reading
+- [❓ Interactive Clarification](docs/usage.md#interactive-clarification) - When AI needs help
+- [⌨️ Shell Completions](docs/usage.md#shell-completions) - Tab completion setup
 
-```bash
-shelly generate --dry-run "delete all log files older than 30 days"
-```
+## Architecture
 
-This shows the generated command without injecting it into your shell, allowing you to verify it's safe before running.
+Shelly is built with:
+- **Rust** + **Tokio** - Async runtime
+- **Clap** - CLI parsing with completions
+- **Async-openai** - AI API communication
+- **Dialoguer** - Interactive prompts
 
-### List Available Commands
+## License
 
-See all available subcommands:
-
-```bash
-shelly cmds
-```
-
-This outputs:
-- `setup` - Run the setup wizard
-- `generate` - Generate shell commands from natural language
-- `cmds` - List all available commands
-- `completions` - Generate shell completion scripts
-
-### Shell Completions
-
-Generate shell completion scripts for tab completion support:
-
-```bash
-# Bash
-shelly completions bash > ~/.bash_completion.d/shelly
-
-# Zsh
-shelly completions zsh > ~/.zsh/completions/_shelly
-
-# Fish
-shelly completions fish > ~/.config/fish/completions/shelly.fish
-```
-
-Then reload your shell configuration:
-
-```bash
-source ~/.bashrc  # for Bash
-source ~/.zshrc   # for Zsh
-```
-
-Fish completions are loaded automatically.
-
-### AI Tools
-
-Shelly can automatically use tools to gather information when generating commands:
-
-- **web_search** - Search the web for current information (versions, events, facts)
-- **read_file** - Read file contents to understand project context
-
-The AI decides when to use tools based on your prompt. You don't need to do anything special - just ask naturally!
-
-Examples that trigger tools:
-```bash
-# Triggers web search for latest version
-shelly "what's the latest version of Go"
-
-# Triggers read_file to see your config
-shelly "show me my Cargo.toml dependencies"
-
-# May trigger web search for current best practices
-shelly "how do I set up a Next.js project with the latest version"
-```
-
-Tools are executed transparently and their results are incorporated into the generated command.
-
-### Interactive Clarification
-
-When your request is ambiguous, shelly can ask for clarification using a 
-selectable list interface:
-
-```bash
-$ shelly "delete logs"
-🤔 The AI needs clarification:
-Which logs would you like to delete?
-Navigate with ↑↓ and press Enter to select:
-
-> System logs older than 7 days
-  Application logs in current project  
-  All logs everywhere (dangerous!)
-  Cancel / Don't delete anything
-
-Your choice: Application logs in current project
-
-✓ Command generated: rm -f logs/*.log
-```
-
-This uses arrow-key navigation and prevents destructive mistakes.
-
-### Skills
-
-Shelly automatically matches your prompt to specialized skills in `~/.config/shelly/skills/`:
-
-```bash
-# Automatically uses curl-command-generator skill
-shelly generate "generate curl commands for my API endpoints"
-```
-
-When a skill is activated, you'll see `📚 Using skill: <skill-name>`.
-
-#### Installing Skills
-
-Skills are Markdown files with frontmatter:
-
-```markdown
----
-name: my-skill
-description: Use when users want X, Y, or Z
----
-
-# Instructions for the AI...
-```
-
-Install by copying to shelly's skills directory:
-
-```bash
-mkdir -p ~/.config/shelly/skills/my-skill
-cp path/to/SKILL.md ~/.config/shelly/skills/my-skill/
-```
-
-## ⚙️ Architecture
-
-Shelly leverages an async Rust core powered by:
-- **`tokio`**: For asynchronous AI requests.
-- **`async-openai`**: For OpenAI-compatible API communication.
-- **`clap`**: For CLI argument parsing.
-- **`indicatif`**: For real-time progress spinners.
-- **`handlebars`**: For templating system prompts with OS/shell context.
-- **`console`**: For styled terminal output.
-- **`confy`**: For cross-platform configuration management.
-
-## 📜 License
 MIT
