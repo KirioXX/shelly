@@ -3,8 +3,10 @@ mod commands;
 mod skills;
 
 use std::error::Error;
+use std::io;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, CommandFactory};
+use clap_complete::{generate, shells};
 
 pub const APP_NAME: &str = "shelly";
 pub const CONFIG_NAME: &str = "config";
@@ -29,7 +31,11 @@ enum Commands {
     },
     /// List all available subcommands
     Cmds {},
-}
+    /// Generate shell completion scripts
+    Completions {
+        #[arg(value_enum)]
+        shell: shells::Shell,
+    },}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -64,6 +70,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             for sub in cmd.get_subcommands() {
                 println!("{}", sub.get_name());
             }
+        }
+        Commands::Completions { shell } => {
+            let mut cmd = Cli::command();
+            let name = cmd.get_name().to_string();
+            generate(shell, &mut cmd, name, &mut io::stdout());
         }
     }
     Ok(())
