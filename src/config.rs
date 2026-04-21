@@ -30,3 +30,22 @@ pub struct Config {
 impl ::std::default::Default for Config {
     fn default() -> Self { Self { model: "".into(), api_url: "".into(), api_key: "".into(), shell: None } }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_shell_display() {
+        assert_eq!(Shell::Bash.to_string(), "Bash");
+        assert_eq!(Shell::Zsh.to_string(), "Zsh");
+        assert_eq!(Shell::Fish.to_string(), "Fish");
+    }
+
+    #[test]
+    fn test_shell_value_enum() {
+        // Shell implements ValueEnum for clap
+        let shells = Shell::value_variants();
+        assert_eq!(shells.len(), 3);
+    }
+}
