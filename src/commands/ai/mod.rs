@@ -1,11 +1,12 @@
+mod system_prompt;
+
 use std::error::Error;
-use std::collections::BTreeMap;
+
 use console::style;
-use handlebars::Handlebars;
+
 use indicatif::{ProgressBar, ProgressStyle};
 use crate::{APP_NAME, CONFIG_NAME};
 use crate::config::{Config};
-use crate::skills::SkillManager;
 use crate::tools::{ToolRegistry, WebSearch, ReadFile};
 use async_openai::types::{
     ChatCompletionRequestSystemMessageArgs,
@@ -18,8 +19,6 @@ use async_openai::{
 };
 use serde_json::Value;
 
-
-const SYSTEM_PROMPT_TEMPLATE: &str = include_str!("prompts/system-prompt.md");
 
 fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
   Client::with_config(
@@ -36,34 +35,6 @@ fn create_tool_registry() -> ToolRegistry {
     registry
 }
 
-fn get_system_prompt(full_prompt: &str, cfg: &Config) -> Result<String, Box<dyn Error>> {
-    // Check for matching skill
-    let skill_manager = SkillManager::new()?;
-    let skill_instruction = if let Some(skill) = skill_manager.find_matching_skill(full_prompt)? {
-        eprintln!("{}", style(format!("📚 Using skill: {}", skill.name)).cyan());
-        Some(skill.content)
-    } else {
-        None
-    };
-
-    // Build system prompt with OS and shell info
-    let handlebars = Handlebars::new();
-    let mut data = BTreeMap::new();
-    data.insert("os", std::env::consts::OS);
-    let shell_str = cfg.shell.as_ref().map(|s| s.to_string()).unwrap_or_else(|| "unknown".to_string());
-    data.insert("shell", shell_str.as_str());
-
-    let mut system_prompt = handlebars.render_template(SYSTEM_PROMPT_TEMPLATE, &data)?;
-
-    // Append skill instructions if found
-    if let Some(instruction) = skill_instruction {
-        system_prompt.push_str("\n\n# Skill Context\n\n");
-        system_prompt.push_str(&instruction);
-    }
-
-    Ok(system_prompt)
-}
-
 pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn Error>> {
     let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
 
@@ -72,7 +43,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn 
     }
 
     let full_prompt = prompt.join(" ");
-    let system_prompt = match get_system_prompt(&full_prompt, &cfg) {
+    let system_prompt = match system_prompt::get_system_prompt(&full_prompt, &cfg) {
         Ok(sp) => sp,
         Err(_err) => "".to_string(),
     };
@@ -155,7 +126,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn 
 
                     // Log tool usage similar to skills
                     eprintln!("{}", style(format!("🔧 Using tool: {}", tool_name)).cyan());
-                    
+
                     // Execute the tool
                     let result = if let Some(tool) = registry.get(tool_name) {
                         match tool.execute(tool_args).await {
