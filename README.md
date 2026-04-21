@@ -75,6 +75,19 @@ shelly generate --dry-run "delete all log files older than 30 days"
 
 This shows the generated command without injecting it into your shell, allowing you to verify it's safe before running.
 
+### List Available Commands
+
+See all available subcommands:
+
+```bash
+shelly cmds
+```
+
+This outputs:
+- `setup` - Run the setup wizard
+- `generate` - Generate shell commands from natural language
+- `cmds` - List all available commands
+
 ### Skills
 
 Shelly automatically matches your prompt to specialized skills in `~/.config/shelly/skills/`:
