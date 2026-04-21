@@ -32,6 +32,29 @@ source ~/.bashrc  # for Bash
 source ~/.config/fish/config.fish  # for Fish
 ```
 
+### Build from source with `just`
+
+We use [`just`](https://github.com/casey/just) for common development tasks:
+
+```bash
+# Install just
+cargo install just
+
+# See all available commands
+just
+```
+
+Available recipes:
+
+| Command | Description |
+|---------|-------------|
+| `just build` | Build release binary |
+| `just install` | Build and install to cargo's bin directory (`$CARGO_HOME/bin`) |
+| `just check` | Quick cargo check |
+| `just lint` | Run clippy |
+| `just test` | Run tests |
+| `just run -- <args>` | Dev build and run with arguments |
+
 ## 📖 Usage
 
 Simply describe the command you need:

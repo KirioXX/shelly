@@ -27,10 +27,10 @@ fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
     )
 }
 
-fn get_system_prompt(full_prompt: &String, cfg: &Config) -> Result<String, Box<dyn Error>> {
+fn get_system_prompt(full_prompt: &str, cfg: &Config) -> Result<String, Box<dyn Error>> {
     // Check for matching skill
     let skill_manager = SkillManager::new()?;
-    let skill_instruction = if let Some(skill) = skill_manager.find_matching_skill(&full_prompt)? {
+    let skill_instruction = if let Some(skill) = skill_manager.find_matching_skill(full_prompt)? {
         eprintln!("{}", style(format!("📚 Using skill: {}", skill.name)).cyan());
         Some(skill.content)
     } else {

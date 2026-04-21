@@ -41,10 +41,8 @@ impl SkillManager {
 
             if path.is_dir() {
                 let skill_md = path.join("SKILL.md");
-                if skill_md.exists() {
-                    if let Some(skill) = self.parse_skill(&skill_md)? {
-                        skills.push(skill);
-                    }
+                if skill_md.exists() && let Some(skill) = self.parse_skill(&skill_md)? {
+                    skills.push(skill);
                 }
             }
         }

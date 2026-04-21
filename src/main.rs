@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 Err(_err) => eprintln!("Setup failed")
             }
         },
-        None {} => {
+        None => {
             match commands::ai::call(cli.prompt, cli.dry_run).await {
                 Ok(command) => println!("{}", command),
                 Err(err) => println!("Failed: {:?}", err)

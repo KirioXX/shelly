@@ -5,7 +5,7 @@
 - [x] **Dry-run mode** (`--dry-run` flag)
   - ~~Show command without injecting it~~
   - ~~Useful for testing AI responses before running~~
-  
+
 - [ ] **Shell completion generation** (`--completions <shell>`)
   - Generate completion scripts for Bash/Zsh/Fish
   - Users can pipe to their shell config
@@ -15,7 +15,7 @@
   - ~~Match prompts to skills by keywords in description~~
   - ~~Prepend skill instructions to system prompt~~
   - Installed: `curl-command-generator` (copied from Pi skills)
-  
+
 - [ ] **Setup tools** (e.g. web search, file reading)
   - Tool definitions for the AI (web search, read file, etc.)
   - Let AI decide when to use tools
@@ -25,6 +25,7 @@
 - [ ] **Support multiple skills** in one session
 - [ ] **Manual skill selection** (`--skill <name>` flag)
 - [ ] **Skill install command**: `shelly skill add <url>`
+- [ ] **Automatic skill installation**: discover and install missing skills on demand
 
 ## 🚀 Future Ideas
 
@@ -44,6 +45,7 @@
 - [ ] **Configuration editing**
   - `shelly config` to view/edit settings
   - Change model without re-running setup
+  - Show current config when re-running setup command
 
 ## ✅ Completed
 

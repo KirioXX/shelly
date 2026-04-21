@@ -76,7 +76,7 @@ pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
     println!("\nProposed shell wrapper:\n{}", wrapper);
 
     if Confirm::with_theme(&theme)
-        .with_prompt(&format!("Would you like to add this to your {:?}?", config_file))
+        .with_prompt(format!("Would you like to add this to your {:?}?", config_file))
         .interact()?
     {
         let mut file = OpenOptions::new()
@@ -86,7 +86,7 @@ pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
 
         writeln!(file, "# shelly\n{}\n# shelly end\n", wrapper)?;
         println!("Shell integration added successfully!");
-        println!("")
+        println!()
     }
 
     Ok(Some(Config {
