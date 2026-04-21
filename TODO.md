@@ -14,11 +14,11 @@
 - [ ] Command history
   - Store generated commands with timestamps
   - `shelly history` to list, `shelly undo` or replay
-- [ ] Interactive clarification tool (`ask_user`)
-  - When prompt is ambiguous, AI can request user choice
-  - Use dialoguer to present options interactively
-  - Example: `shelly "delete logs"` → AI asks which logs, user selects option 1/2/3
-  - Keeps one-shot flow but allows smart clarification
+- [x] **Interactive clarification tool** (`ask_user`)
+  - ~~When prompt is ambiguous, AI can request user choice~~
+  - ~~Uses dialoguer::Select to present options interactively~~
+  - ~~Arrow key navigation, Enter to select~~
+  - ~~Returns selected value to AI for command generation~~
 
 ### Configuration
 - [ ] Configuration editing (`shelly config`)
