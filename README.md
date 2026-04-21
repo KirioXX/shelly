@@ -57,8 +57,6 @@ Available recipes:
 
 ## 📖 Usage
 
-**Breaking Change:** As of this version, you must use `shelly generate` instead of `shelly` directly.
-
 Simply describe the command you need:
 
 ```bash
