@@ -26,10 +26,11 @@
   - Show current config when re-running setup
 
 ### Testing & Quality
-- [ ] Add tests
-  - Unit tests for shell detection
-  - Tests for AI response parsing
-  - Mock API responses for testing
+- [x] **Add tests**
+  - ~~Unit tests for shell detection~~
+  - ~~Unit tests for tools (ToolRegistry, traits)~~
+  - ~~Unit tests for skills (SkillManager, parsing)~~
+  - ~~Smoke tests for CLI commands~~
 
 ## ✅ Completed
 
