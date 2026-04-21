@@ -32,7 +32,7 @@ fn create_tool_registry() -> ToolRegistry {
     let mut registry = ToolRegistry::new();
     registry.register(WebSearch);
     registry.register(ReadFile);
-    registry.register(AskUser);
+    // registry.register(AskUser);  // Temporarily disabled - requires API with tool support
     registry
 }
 
