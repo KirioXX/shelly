@@ -38,10 +38,6 @@ impl ToolRegistry {
         self.tools.get(name).map(|t| t.as_ref())
     }
     
-    pub fn list(&self) -> Vec<&dyn Tool> {
-        self.tools.values().map(|t| t.as_ref()).collect()
-    }
-    
     /// Generate function definitions for OpenAI
     pub fn to_function_definitions(&self) -> Vec<async_openai::types::ChatCompletionTool> {
         self.tools.values()
