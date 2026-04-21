@@ -64,3 +64,6 @@ impl Default for ToolRegistry {
 
 pub mod web_search;
 pub use web_search::WebSearch;
+
+pub mod read_file;
+pub use read_file::ReadFile;
