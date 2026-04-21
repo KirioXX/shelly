@@ -87,6 +87,31 @@ This outputs:
 - `setup` - Run the setup wizard
 - `generate` - Generate shell commands from natural language
 - `cmds` - List all available commands
+- `completions` - Generate shell completion scripts
+
+### Shell Completions
+
+Generate shell completion scripts for tab completion support:
+
+```bash
+# Bash
+shelly completions bash > ~/.bash_completion.d/shelly
+
+# Zsh
+shelly completions zsh > ~/.zsh/completions/_shelly
+
+# Fish
+shelly completions fish > ~/.config/fish/completions/shelly.fish
+```
+
+Then reload your shell configuration:
+
+```bash
+source ~/.bashrc  # for Bash
+source ~/.zshrc   # for Zsh
+```
+
+Fish completions are loaded automatically.
 
 ### Skills
 
