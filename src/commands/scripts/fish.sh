@@ -1,11 +1,11 @@
 function shelly
-    # If first arg is a non-generate subcommand, pass through directly
-    if contains -- "$argv[1]" setup help -h --help -V --version generate
+    # Check if first arg is a valid subcommand (not a prompt)
+    if test -n "$argv[1]" && command shelly commands | grep -qx "$argv[1]"
         command shelly $argv
         return $status
     end
     
-    # Otherwise, treat as generate (for backwards compat with bare prompts)
+    # Otherwise, treat as a prompt for command generation
     set -l cmd (command shelly generate $argv)
     if test -n "$cmd"
         commandline -r "$cmd"

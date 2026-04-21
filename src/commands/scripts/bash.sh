@@ -1,11 +1,11 @@
 shelly() {
-    # If first arg is a non-generate subcommand, pass through directly
-    if [[ "$1" =~ ^(setup|help|-h|--help|-V|--version|generate)$ ]]; then
+    # Check if first arg is a valid subcommand (not a prompt)
+    if [[ -n "$1" ]] && command shelly commands | grep -qx "$1"; then
         command shelly "$@"
         return $?
     fi
     
-    # Otherwise, treat as generate (for backwards compat with bare prompts)
+    # Otherwise, treat as a prompt for command generation
     local cmd
     cmd=$(command shelly generate "$@")
     if [[ -n "$cmd" ]]; then

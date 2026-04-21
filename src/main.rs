@@ -27,6 +27,8 @@ enum Commands {
         #[arg(long, help = "Show command without executing")]
         dry_run: bool,
     },
+    /// List all available subcommands
+    Commands {},
 }
 
 #[tokio::main]
@@ -55,6 +57,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 Ok(command) => println!("{}", command),
                 Err(err) => println!("Failed: {:?}", err)
             }
+        }
+        Commands::Commands {} => {
+            // Print all subcommand names (one per line, for easy shell parsing)
+             println!("setup");
+            println!("generate");
+            println!("commands");
         }
     }
     Ok(())
