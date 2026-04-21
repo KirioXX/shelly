@@ -136,6 +136,29 @@ shelly "how do I set up a Next.js project with the latest version"
 
 Tools are executed transparently and their results are incorporated into the generated command.
 
+### Interactive Clarification
+
+When your request is ambiguous, shelly can ask for clarification using a 
+selectable list interface:
+
+```bash
+$ shelly "delete logs"
+🤔 The AI needs clarification:
+Which logs would you like to delete?
+Navigate with ↑↓ and press Enter to select:
+
+> System logs older than 7 days
+  Application logs in current project  
+  All logs everywhere (dangerous!)
+  Cancel / Don't delete anything
+
+Your choice: Application logs in current project
+
+✓ Command generated: rm -f logs/*.log
+```
+
+This uses arrow-key navigation and prevents destructive mistakes.
+
 ### Skills
 
 Shelly automatically matches your prompt to specialized skills in `~/.config/shelly/skills/`:
