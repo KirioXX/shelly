@@ -20,6 +20,10 @@ impl SkillManager {
             .join("shelly")
             .join("skills");
 
+        Self::with_path(skills_dir)
+    }
+    
+    pub fn with_path(skills_dir: PathBuf) -> Result<Self, Box<dyn Error>> {
         // Create directory if it doesn't exist
         if !skills_dir.exists() {
             fs::create_dir_all(&skills_dir)?;
@@ -50,7 +54,7 @@ impl SkillManager {
         Ok(skills)
     }
 
-    fn parse_skill(&self, path: &PathBuf) -> Result<Option<Skill>, Box<dyn Error>> {
+    pub fn parse_skill(&self, path: &PathBuf) -> Result<Option<Skill>, Box<dyn Error>> {
         let content = fs::read_to_string(path)?;
 
         // Parse frontmatter (simple YAML-like parsing)
@@ -118,5 +122,139 @@ impl SkillManager {
         }
 
         Ok(None)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_skill_manager_with_path() {
+        let temp_dir = TempDir::new().unwrap();
+        let skills_path = temp_dir.path().join("skills");
+        
+        let manager = SkillManager::with_path(skills_path.clone()).unwrap();
+        assert_eq!(manager.skills_dir, skills_path);
+    }
+
+    #[test]
+    fn test_parse_valid_skill() {
+        let temp_dir = TempDir::new().unwrap();
+        let skill_file = temp_dir.path().join("SKILL.md");
+        
+        let skill_content = r#"---
+name: test-skill
+description: Use when testing
+---
+
+# Test Skill
+
+This is a test skill.
+"#;
+        
+        let mut file = std::fs::File::create(&skill_file).unwrap();
+        file.write_all(skill_content.as_bytes()).unwrap();
+        
+        let manager = SkillManager::with_path(temp_dir.path().to_path_buf()).unwrap();
+        let skill = manager.parse_skill(&skill_file).unwrap();
+        
+        assert!(skill.is_some());
+        let skill = skill.unwrap();
+        assert_eq!(skill.name, "test-skill");
+        assert_eq!(skill.description, "Use when testing");
+        assert!(skill.content.contains("# Test Skill"));
+    }
+
+    #[test]
+    fn test_parse_invalid_skill_no_frontmatter() {
+        let temp_dir = TempDir::new().unwrap();
+        let skill_file = temp_dir.path().join("SKILL.md");
+        
+        let mut file = std::fs::File::create(&skill_file).unwrap();
+        file.write_all(b"Just content, no frontmatter.").unwrap();
+        
+        let manager = SkillManager::with_path(temp_dir.path().to_path_buf()).unwrap();
+        let skill = manager.parse_skill(&skill_file).unwrap();
+        
+        assert!(skill.is_none()); // Should return None for invalid skill
+    }
+
+    #[test]
+    fn test_parse_skill_missing_name() {
+        let temp_dir = TempDir::new().unwrap();
+        let skill_file = temp_dir.path().join("SKILL.md");
+        
+        let skill_content = r#"---
+description: Use when testing
+---
+
+Content here.
+"#;
+        
+        let mut file = std::fs::File::create(&skill_file).unwrap();
+        file.write_all(skill_content.as_bytes()).unwrap();
+        
+        let manager = SkillManager::with_path(temp_dir.path().to_path_buf()).unwrap();
+        let skill = manager.parse_skill(&skill_file).unwrap();
+        
+        assert!(skill.is_none()); // Should return None when name is missing
+    }
+
+    #[test]
+    fn test_find_matching_skill() {
+        let temp_dir = TempDir::new().unwrap();
+        let skills_dir = temp_dir.path().join("skills");
+        std::fs::create_dir(&skills_dir).unwrap();
+        
+        // Create a test skill directory
+        let skill_dir = skills_dir.join("test-skill");
+        std::fs::create_dir(&skill_dir).unwrap();
+        
+        let skill_content = r#"---
+name: test-skill
+description: Use when the user mentions testing
+---
+
+# Test Skill
+"#;
+        
+        let mut file = std::fs::File::create(skill_dir.join("SKILL.md")).unwrap();
+        file.write_all(skill_content.as_bytes()).unwrap();
+        
+        let manager = SkillManager::with_path(skills_dir).unwrap();
+        let skill = manager.find_matching_skill("I need to do some testing").unwrap();
+        
+        assert!(skill.is_some());
+        assert_eq!(skill.unwrap().name, "test-skill");
+    }
+
+    #[test]
+    fn test_find_no_matching_skill() {
+        let temp_dir = TempDir::new().unwrap();
+        let skills_dir = temp_dir.path().join("skills");
+        std::fs::create_dir(&skills_dir).unwrap();
+        
+        // Create a test skill
+        let skill_dir = skills_dir.join("test-skill");
+        std::fs::create_dir(&skill_dir).unwrap();
+        
+        let skill_content = r#"---
+name: test-skill
+description: Use when the user mentions testing
+---
+"#;
+        
+        let mut file = std::fs::File::create(skill_dir.join("SKILL.md")).unwrap();
+        file.write_all(skill_content.as_bytes()).unwrap();
+        
+        let manager = SkillManager::with_path(skills_dir).unwrap();
+        
+        // This prompt doesn't match any keywords
+        let skill = manager.find_matching_skill("deploy to production").unwrap();
+        
+        assert!(skill.is_none());
     }
 }
