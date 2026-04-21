@@ -1,58 +1,62 @@
 # Shelly TODO
 
-## 🎯 Ready for Implementation
-
-- [x] **Dry-run mode** (`--dry-run` flag)
-  - ~~Show command without injecting it~~
-  - ~~Useful for testing AI responses before running~~
-
-- [x] **Shell completion generation** (`shelly completions <shell>`)
-  - ~~Generate completion scripts for Bash/Zsh/Fish~~
-  - ~~Users can pipe to their shell config~~
-
-- [x] **Enable skills** (shelly-specific in `~/.config/shelly/skills/`)
-  - ~~Create skill discovery and loading system~~
-  - ~~Match prompts to skills by keywords in description~~
-  - ~~Prepend skill instructions to system prompt~~
-  - Installed: `curl-command-generator` (copied from Pi skills)
+## 🚧 In Progress / Ready for Development
 
 - [ ] **Setup tools** (e.g. web search, file reading)
   - Tool definitions for the AI (web search, read file, etc.)
   - Let AI decide when to use tools
 
-## 🛠️ Future Enhancements (after testing)
+## 📋 Backlog
 
-- [ ] **Support multiple skills** in one session
-- [ ] **Manual skill selection** (`--skill <name>` flag)
-- [ ] **Skill install command**: `shelly skill add <url>`
-- [ ] **Automatic skill installation**: discover and install missing skills on demand
-- [ ] **Migrate AI call to dedicated subcommand**: Create `shelly generate <prompt>` for core command generation, separate from setup/main entry point (fixes logging issues, makes setup more robust)
+### Skills System
+- [ ] Support multiple skills in one session
+- [ ] Manual skill selection (`--skill <name>` flag)
+- [ ] Skill install command: `shelly skill add <url>`
+- [ ] Automatic skill installation (discover and install missing skills on demand)
 
-## 🚀 Future Ideas
-
-- [ ] **Command history**
+### Shell & UX
+- [ ] Command history
   - Store generated commands with timestamps
   - `shelly history` to list, `shelly undo` or replay
+- [ ] Multi-turn conversations (`shelly --chat`)
+  - Back-and-forth refinement
+  - Context from previous commands
 
-- [ ] **Add tests**
+### Configuration
+- [ ] Configuration editing (`shelly config`)
+  - View/edit settings without re-running setup
+  - Show current config when re-running setup
+
+### Testing & Quality
+- [ ] Add tests
   - Unit tests for shell detection
   - Tests for AI response parsing
   - Mock API responses for testing
 
-- [ ] **Multi-turn conversations**
-  - `shelly --chat` for back-and-forth refinement
-  - Context from previous commands
-
-- [ ] **Configuration editing**
-  - `shelly config` to view/edit settings
-  - Change model without re-running setup
-  - Show current config when re-running setup command
-
 ## ✅ Completed
 
+### Core Features
 - [x] Fish shell support
-- [x] Move shell scripts to external files with `include_str!`
 - [x] System prompt with OS/shell context
 - [x] Proper stdout/stderr split
 - [x] Pixel spinner and styled output
 - [x] Error handling for edge cases
+
+### Architecture
+- [x] Move shell scripts to external files with `include_str!`
+- [x] Migrate AI call to dedicated subcommand (`shelly generate`)
+
+### CLI Features
+- [x] Dry-run mode (`--dry-run` flag)
+- [x] Shell completion generation (`shelly completions <shell>`)
+
+### Skills
+- [x] Enable skills (shelly-specific in `~/.config/shelly/skills/`)
+  - Skill discovery and loading system
+  - Match prompts to skills by keywords in description
+  - Prepend skill instructions to system prompt
+  - Installed: `curl-command-generator` (copied from Pi skills)
+
+---
+
+*Last updated: 2025-04-21*
