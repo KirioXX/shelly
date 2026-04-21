@@ -1,16 +1,10 @@
-mod config;
-mod commands;
-mod skills;
-mod tools;
+use shelly::*;
 
 use std::error::Error;
 use std::io;
 
 use clap::{Parser, Subcommand, CommandFactory};
 use clap_complete::{generate, shells};
-
-pub const APP_NAME: &str = "shelly";
-pub const CONFIG_NAME: &str = "config";
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
