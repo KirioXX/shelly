@@ -57,12 +57,14 @@ Available recipes:
 
 ## 📖 Usage
 
+**Breaking Change:** As of this version, you must use `shelly generate` instead of `shelly` directly.
+
 Simply describe the command you need:
 
 ```bash
-shelly "list all docker containers running on port 8080"
-shelly "find all files larger than 100MB in the current directory"
-shelly "git commit all changes with the message 'fix: resolve bug #123'"
+shelly generate "list all docker containers running on port 8080"
+shelly generate "find all files larger than 100MB in the current directory"
+shelly generate "git commit all changes with the message 'fix: resolve bug #123'"
 ```
 
 ### Dry-Run Mode
@@ -70,7 +72,7 @@ shelly "git commit all changes with the message 'fix: resolve bug #123'"
 Preview commands before executing them:
 
 ```bash
-shelly --dry-run "delete all log files older than 30 days"
+shelly generate --dry-run "delete all log files older than 30 days"
 ```
 
 This shows the generated command without injecting it into your shell, allowing you to verify it's safe before running.
@@ -81,7 +83,7 @@ Shelly automatically matches your prompt to specialized skills in `~/.config/she
 
 ```bash
 # Automatically uses curl-command-generator skill
-shelly "generate curl commands for my API endpoints"
+shelly generate "generate curl commands for my API endpoints"
 ```
 
 When a skill is activated, you'll see `📚 Using skill: <skill-name>`.
