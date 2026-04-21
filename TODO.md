@@ -2,10 +2,6 @@
 
 ## 🚧 In Progress / Ready for Development
 
-- [ ] **Setup tools** (e.g. web search, file reading)
-  - Tool definitions for the AI (web search, read file, etc.)
-  - Let AI decide when to use tools
-
 ## 📋 Backlog
 
 ### Skills System
@@ -49,6 +45,13 @@
 ### CLI Features
 - [x] Dry-run mode (`--dry-run` flag)
 - [x] Shell completion generation (`shelly completions <shell>`)
+
+### AI Tools
+- [x] **Setup tools** (web search, file reading)
+  - Tool framework with trait and registry
+  - Web search tool (DuckDuckGo)
+  - Read file tool (with security restrictions)
+  - AI decides when to use tools based on prompts
 
 ### Skills
 - [x] Enable skills (shelly-specific in `~/.config/shelly/skills/`)
