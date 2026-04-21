@@ -43,13 +43,17 @@ impl ToolRegistry {
     }
     
     /// Generate function definitions for OpenAI
-    pub fn to_function_definitions(&self) -> Vec<async_openai::types::ChatCompletionFunctions> {
+    pub fn to_function_definitions(&self) -> Vec<async_openai::types::ChatCompletionTool> {
         self.tools.values()
             .map(|tool| {
-                async_openai::types::ChatCompletionFunctions {
+                let function = async_openai::types::FunctionObject {
                     name: tool.name().to_string(),
                     description: Some(tool.description().to_string()),
-                    parameters: tool.parameters(),
+                    parameters: Some(tool.parameters()),
+                };
+                async_openai::types::ChatCompletionTool {
+                    r#type: async_openai::types::ChatCompletionToolType::Function,
+                    function,
                 }
             })
             .collect()
