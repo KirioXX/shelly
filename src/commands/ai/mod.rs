@@ -96,7 +96,14 @@ pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn 
                 .messages(messages.clone())
                 .build()?
         };
-        let response = client.chat().create(request).await?;
+        let response = match client.chat().create(request).await {
+            Ok(resp) => resp,
+            Err(e) => {
+                pb.finish_and_clear();
+                eprintln!("Debug: API Error details: {:?}", e);
+                return Err(format!("API request failed: {:?}", e).into());
+            }
+        };
 
         if response.choices.is_empty() {
             pb.finish_and_clear();
