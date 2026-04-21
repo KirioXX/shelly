@@ -21,7 +21,9 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    /// Run the setup wizard
     Setup {},
+    /// Generate shell commands from natural language
     Generate {
         #[arg(trailing_var_arg = true)]
         prompt: Vec<String>,
