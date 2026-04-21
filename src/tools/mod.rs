@@ -61,3 +61,6 @@ impl Default for ToolRegistry {
         Self::new()
     }
 }
+
+pub mod web_search;
+pub use web_search::WebSearch;
