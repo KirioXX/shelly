@@ -6,9 +6,9 @@
   - ~~Show command without injecting it~~
   - ~~Useful for testing AI responses before running~~
 
-- [ ] **Shell completion generation** (`--completions <shell>`)
-  - Generate completion scripts for Bash/Zsh/Fish
-  - Users can pipe to their shell config
+- [x] **Shell completion generation** (`shelly completions <shell>`)
+  - ~~Generate completion scripts for Bash/Zsh/Fish~~
+  - ~~Users can pipe to their shell config~~
 
 - [x] **Enable skills** (shelly-specific in `~/.config/shelly/skills/`)
   - ~~Create skill discovery and loading system~~
