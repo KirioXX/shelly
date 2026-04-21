@@ -7,7 +7,7 @@ use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
 use crate::{APP_NAME, CONFIG_NAME};
 use crate::config::{Config};
-use crate::tools::{ToolRegistry, WebSearch, ReadFile};
+use crate::tools::{ToolRegistry, WebSearch, ReadFile, AskUser};
 use async_openai::types::{
     ChatCompletionRequestSystemMessageArgs,
     ChatCompletionRequestUserMessageArgs,
@@ -32,6 +32,7 @@ fn create_tool_registry() -> ToolRegistry {
     let mut registry = ToolRegistry::new();
     registry.register(WebSearch);
     registry.register(ReadFile);
+    registry.register(AskUser);
     registry
 }
 

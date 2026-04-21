@@ -68,6 +68,9 @@ pub use web_search::WebSearch;
 pub mod read_file;
 pub use read_file::ReadFile;
 
+pub mod ask_user;
+pub use ask_user::AskUser;
+
 #[cfg(test)]
 mod tests {
     use super::*;
