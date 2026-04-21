@@ -113,6 +113,29 @@ source ~/.zshrc   # for Zsh
 
 Fish completions are loaded automatically.
 
+### AI Tools
+
+Shelly can automatically use tools to gather information when generating commands:
+
+- **web_search** - Search the web for current information (versions, events, facts)
+- **read_file** - Read file contents to understand project context
+
+The AI decides when to use tools based on your prompt. You don't need to do anything special - just ask naturally!
+
+Examples that trigger tools:
+```bash
+# Triggers web search for latest version
+shelly "what's the latest version of Go"
+
+# Triggers read_file to see your config
+shelly "show me my Cargo.toml dependencies"
+
+# May trigger web search for current best practices
+shelly "how do I set up a Next.js project with the latest version"
+```
+
+Tools are executed transparently and their results are incorporated into the generated command.
+
 ### Skills
 
 Shelly automatically matches your prompt to specialized skills in `~/.config/shelly/skills/`:
