@@ -14,9 +14,11 @@
 - [ ] Command history
   - Store generated commands with timestamps
   - `shelly history` to list, `shelly undo` or replay
-- [ ] Multi-turn conversations (`shelly --chat`)
-  - Back-and-forth refinement
-  - Context from previous commands
+- [ ] Interactive clarification tool (`ask_user`)
+  - When prompt is ambiguous, AI can request user choice
+  - Use dialoguer to present options interactively
+  - Example: `shelly "delete logs"` → AI asks which logs, user selects option 1/2/3
+  - Keeps one-shot flow but allows smart clarification
 
 ### Configuration
 - [ ] Configuration editing (`shelly config`)
