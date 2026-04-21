@@ -23,12 +23,12 @@ enum Commands {
     Generate {
         #[arg(trailing_var_arg = true)]
         prompt: Vec<String>,
-        
+
         #[arg(long, help = "Show command without executing")]
         dry_run: bool,
     },
     /// List all available subcommands
-    Commands {},
+    Cmds {},
 }
 
 #[tokio::main]
@@ -58,11 +58,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 Err(err) => println!("Failed: {:?}", err)
             }
         }
-        Commands::Commands {} => {
-            // Print all subcommand names (one per line, for easy shell parsing)
-             println!("setup");
-            println!("generate");
-            println!("commands");
+        Commands::Cmds {} => {
+            // Dynamically list all subcommands from the enum
+            let cmd = <Commands as clap::Subcommand>::augment_subcommands(clap::Command::new("shelly"));
+            for sub in cmd.get_subcommands() {
+                println!("{}", sub.get_name());
+            }
         }
     }
     Ok(())
