@@ -1,6 +1,6 @@
 function shelly
     # Check if first arg is a valid subcommand (not a prompt)
-    if test -n "$argv[1]" && command shelly commands | grep -qx "$argv[1]"
+    if test -n "$argv[1]" && command shelly cmds | grep -qx "$argv[1]"
         command shelly $argv
         return $status
     end
