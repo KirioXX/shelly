@@ -1,6 +1,7 @@
 mod config;
 mod commands;
 mod skills;
+mod tools;
 
 use std::error::Error;
 use std::io;

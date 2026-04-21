@@ -1711,6 +1711,7 @@ name = "shelly"
 version = "0.1.0"
 dependencies = [
  "async-openai",
+ "async-trait",
  "clap",
  "clap_complete",
  "confy",
