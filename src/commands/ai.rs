@@ -80,7 +80,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn 
     let client = get_client(&cfg.api_key, &cfg.api_url);
     let registry = create_tool_registry();
     let tools = registry.to_function_definitions();
-    
+
     // Build initial messages
     let mut messages: Vec<async_openai::types::ChatCompletionRequestMessage> = vec![
         ChatCompletionRequestSystemMessageArgs::default()
@@ -105,7 +105,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn 
     // Tool calling loop (max 3 iterations)
     let mut tool_calls_count = 0;
     let max_tool_calls = 3;
-    let mut final_command = None;
+    let final_command;
 
     loop {
         // Build request - handle tools conditionally
@@ -132,26 +132,29 @@ pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn 
         }
 
         let choice = response.choices.first().unwrap();
-        
+
         // Check if AI wants to call tools
         if let Some(tool_calls) = &choice.message.tool_calls {
             if !tool_calls.is_empty() && tool_calls_count < max_tool_calls {
                 // AI wants to call tools
                 tool_calls_count += 1;
                 pb.set_message(format!("Using tools ({}/{})...", tool_calls_count, max_tool_calls));
-                
+
                 // Add assistant message with tool calls
                 let assistant_msg = async_openai::types::ChatCompletionRequestAssistantMessageArgs::default()
                     .content(choice.message.content.clone().unwrap_or_default())
                     .tool_calls(choice.message.tool_calls.clone().unwrap_or_default())
                     .build()?;
                 messages.push(assistant_msg.into());
-                
+
                 // Execute each tool call and add results
                 for tool_call in tool_calls {
                     let function_call = &tool_call.function;
                     let tool_name = &function_call.name;
                     let tool_args: Value = serde_json::from_str(&function_call.arguments)?;
+
+                    // Log tool usage similar to skills
+                    eprintln!("{}", style(format!("🔧 Using tool: {}", tool_name)).cyan());
                     
                     // Execute the tool
                     let result = if let Some(tool) = registry.get(tool_name) {
@@ -162,7 +165,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn 
                     } else {
                         format!("Error: Tool '{}' not found", tool_name)
                     };
-                    
+
                     // Add tool result to messages
                     messages.push(
                         async_openai::types::ChatCompletionRequestToolMessageArgs::default()
