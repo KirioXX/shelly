@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 clap = { version = "4.6.0", features = ["derive"] }
+clap_complete = "4.6.0"
 confy = "2.0.0"
 console = "0.15"
 dialoguer = { version = "0.12.0", features = ["completion", "fuzzy-matcher", "fuzzy-select", "history"] }
