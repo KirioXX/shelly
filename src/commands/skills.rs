@@ -7,10 +7,13 @@ use clap::{Subcommand};
 pub enum SkillsCommands {
     /// List installed skills
     List {},
-    /// Install a skill from a GitHub repository
+    /// Install skills from a GitHub repository
     Add {
-        /// GitHub URL or user/repo shorthand
+        /// GitHub URL or user/repo shorthand (e.g., owner/repo)
         url: String,
+        /// Specific skill name to install (optional - installs all if not specified)
+        #[arg(long)]
+        skill: Option<String>,
     },
 }
 
@@ -42,24 +45,38 @@ pub fn list() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-/// Install a skill from a GitHub URL
-pub async fn add(url: String) -> Result<(), Box<dyn Error>> {
+/// Install skill(s) from a GitHub URL
+pub async fn add(url: String, specific_skill: Option<String>) -> Result<(), Box<dyn Error>> {
     let manager = SkillManager::new()?;
 
     eprintln!(
         "{}",
-        style(format!("Attempting to install skill from: {}", url)).dim()
+        style(format!("Attempting to install from: {}", url)).dim()
     );
 
-    match manager.install_from_url(&url).await {
-        Ok(skill_name) => {
-            println!(
-                "\n{}",
-                style(format!("✓ Successfully installed '{}'", skill_name))
-                    .green()
-                    .bold()
-            );
-            println!("Use 'shelly skills list' to see all installed skills.");
+    match manager.install_from_url(&url, specific_skill.as_deref()).await {
+        Ok(installed) => {
+            if installed.is_empty() {
+                println!("\n{}", style("No skills were installed.").yellow());
+            } else if installed.len() == 1 {
+                println!(
+                    "\n{}",
+                    style(format!("✓ Successfully installed '{}'", installed[0]))
+                        .green()
+                        .bold()
+                );
+            } else {
+                println!(
+                    "\n{}",
+                    style(format!("✓ Successfully installed {} skills:", installed.len()))
+                        .green()
+                        .bold()
+                );
+                for name in &installed {
+                    println!("    • {}", style(name).cyan());
+                }
+            }
+            println!("\nUse 'shelly skills list' to see all installed skills.");
         }
         Err(e) => {
             eprintln!(

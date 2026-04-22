@@ -55,9 +55,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         eprintln!("Failed to list skills: {:?}", err);
                     }
                 }
-                SkillsCommands::Add { url } => {
-                    if let Err(err) = commands::skills::add(url).await {
-                        eprintln!("Failed to install skill: {:?}", err);
+                SkillsCommands::Add { url, skill } => {
+                    if let Err(err) = commands::skills::add(url, skill).await {
+                        eprintln!("Failed to install skill(s): {:?}", err);
                         std::process::exit(1);
                     }
                 }

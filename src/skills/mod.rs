@@ -34,16 +34,17 @@ impl SkillManager {
         Ok(Self { skills_dir })
     }
 
-    pub async fn install_from_url(&self, url: &str) -> Result<String, Box<dyn Error>> {
+    pub async fn install_from_url(
+        &self,
+        url: &str,
+        specific_skill: Option<&str>,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
         use crate::skills::installer::SkillInstaller;
-        
+
         let github_url = SkillInstaller::parse_github_url(url)?;
-        let repo_name = SkillInstaller::extract_repo_name(&github_url)?;
-        
+
         let installer = SkillInstaller::new(self.skills_dir.clone());
-        installer.install_from_github(&github_url, &repo_name).await?;
-        
-        Ok(repo_name)
+        installer.install_from_github(&github_url, specific_skill).await
     }
 
     pub fn discover_skills(&self) -> Result<Vec<Skill>, Box<dyn Error>> {

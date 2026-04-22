@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use console::style;
@@ -32,38 +32,15 @@ impl SkillInstaller {
         }
     }
 
-    /// Extract repo name from GitHub URL
-    pub fn extract_repo_name(url: &str) -> Result<String, Box<dyn Error>> {
-        let parts: Vec<&str> = url.trim_end_matches('/').split('/').collect();
-        if parts.len() >= 5 {
-            Ok(parts[4].to_string())
-        } else {
-            Err("Could not extract repo name from URL".into())
-        }
-    }
-
-    /// Download repo as tarball and extract it
+    /// Download repo as tarball and extract skills
     pub async fn install_from_github(
         &self,
         github_url: &str,
-        repo_name: &str,
-    ) -> Result<PathBuf, Box<dyn Error>> {
-        let target_dir = self.skills_dir.join(repo_name);
-
-        if target_dir.exists() {
-            return Err(format!(
-                "Skill '{}' is already installed. Use 'shelly skill remove {}' first.",
-                repo_name, repo_name
-            )
-            .into());
-        }
-
+        specific_skill: Option<&str>,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
         let tarball_url = format!("{}/archive/refs/heads/main.tar.gz", github_url);
 
-        eprintln!(
-            "{}",
-            style(format!("📦 Downloading skill '{}'...", repo_name)).cyan()
-        );
+        eprintln!("{}", style("📦 Downloading...").cyan());
 
         // Download tarball
         let response = reqwest::get(&tarball_url).await?;
@@ -87,9 +64,12 @@ impl SkillInstaller {
         let bytes = response.bytes().await?;
 
         // Create temp directory for extraction using std::env::temp_dir()
-        let temp_dir = std::env::temp_dir().join(format!("shelly-skill-{}", repo_name));
+        let temp_dir = std::env::temp_dir().join(format!("shelly-skill-{}"
+            , std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)?
+                .as_secs()));
         if temp_dir.exists() {
-            std::fs::remove_dir_all(&temp_dir)?;
+            let _ = std::fs::remove_dir_all(&temp_dir);
         }
         std::fs::create_dir_all(&temp_dir)?;
 
@@ -125,27 +105,150 @@ impl SkillInstaller {
             return Err("No files extracted from tarball".into());
         }
 
-        let extracted_dir = &entries[0].path();
+        let extracted_dir = entries[0].path();
 
-        // Validate SKILL.md exists
-        let skill_md = extracted_dir.join("SKILL.md");
-        if !skill_md.exists() {
-            return Err("No SKILL.md found in repository. A valid skill requires a SKILL.md file.".to_string()
-            .into());
+        // Find all skill directories (directories containing SKILL.md)
+        let mut available_skills: Vec<(String, PathBuf)> = Vec::new();
+        self.find_skills_in_dir(&extracted_dir, &mut available_skills)?;
+
+        if available_skills.is_empty() {
+            return Err(
+                "No skills found in repository. Expected directories containing SKILL.md files."
+                    .into(),
+            );
         }
 
-        // Move to skills directory
-        std::fs::rename(extracted_dir, &target_dir)?;
+        // Filter to specific skill if requested
+        let skills_to_install: Vec<(String, PathBuf)> = match specific_skill {
+            Some(name) => {
+                let found = available_skills
+                    .iter()
+                    .find(|(skill_name, _)| skill_name == name || skill_name == &name.replace("-", "_"))
+                    .cloned();
+                match found {
+                    Some(skill) => vec![skill],
+                    None => {
+                        return Err(format!(
+                            "Skill '{}' not found. Available skills: {}",
+                            name,
+                            available_skills.iter().map(|(n, _)| n.as_str()).collect::<Vec<_>>().join(", ")
+                        )
+                        .into());
+                    }
+                }
+            }
+            None => available_skills,
+        };
+
+        // Install each skill
+        let mut installed = Vec::new();
+        for (skill_name, skill_path) in skills_to_install {
+            let target_dir = self.skills_dir.join(&skill_name);
+
+            if target_dir.exists() {
+                eprintln!(
+                    "{}",
+                    style(format!("⚠️  Skill '{}' already installed, skipping", skill_name)).yellow()
+                );
+                continue;
+            }
+
+            eprintln!(
+                "{}",
+                style(format!("  📁 Installing '{}'...", skill_name)).dim()
+            );
+
+            // Move to skills directory
+            std::fs::rename(&skill_path, &target_dir)?;
+
+            // Add metadata
+            let meta_path = target_dir.join(".skill-source.json");
+            let _ = std::fs::write(
+                meta_path,
+                format!(
+                    r#"{{"source": "{}", "installedAt": "{}"}}"#,
+                    github_url,
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)?
+                        .as_secs()
+                ),
+            );
+
+            installed.push(skill_name);
+        }
 
         // Clean up temp directory
         let _ = std::fs::remove_dir_all(&temp_dir);
 
-        eprintln!(
-            "{}",
-            style(format!("✓ Installed skill '{}'", repo_name)).green()
-        );
+        Ok(installed)
+    }
 
-        Ok(target_dir)
+    /// Recursively find all skill directories (containing SKILL.md)
+    fn find_skills_in_dir(
+        &self,
+        dir: &Path,
+        skills: &mut Vec<(String, PathBuf)>,
+    ) -> Result<(), Box<dyn Error>> {
+        for entry in std::fs::read_dir(dir)? {
+            let entry = entry?;
+            let path = entry.path();
+
+            if path.is_dir() {
+                let skill_md = path.join("SKILL.md");
+                if skill_md.exists() {
+                    // This is a skill directory - extract name from SKILL.md
+                    if let Some(name) = self.extract_skill_name(&skill_md)? {
+                        skills.push((name, path));
+                    }
+                } else {
+                    // Check if this directory contains skill subdirectories
+                    // but don't recurse into common non-skill directories
+                    let dir_name = path.file_name()
+                        .and_then(|n| n.to_str())
+                        .unwrap_or("");
+                    if !matches!(dir_name, "node_modules" | ".git" | "target" | ".github" | "tests" | "docs") {
+                        self.find_skills_in_dir(&path, skills)?;
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Extract skill name from SKILL.md frontmatter
+    fn extract_skill_name(&self, path: &Path) -> Result<Option<String>, Box<dyn Error>> {
+        let content = std::fs::read_to_string(path)?;
+
+        // Parse frontmatter for name field
+        let mut in_frontmatter = false;
+        let mut _frontmatter_done = false;
+
+        for line in content.lines() {
+            if line == "---" {
+                if !in_frontmatter {
+                    in_frontmatter = true;
+                } else {
+                    _frontmatter_done = true;
+                    break;
+                }
+                continue;
+            }
+
+            if in_frontmatter && let Some((key, value)) = line.split_once(':') {
+                let key = key.trim();
+                let value = value.trim();
+                if key == "name" && !value.is_empty() {
+                    return Ok(Some(value.to_string()));
+                }
+            }
+        }
+
+        // Fallback: use directory name
+        Ok(path.parent()
+            .and_then(|p| p.file_name())
+            .and_then(|n| n.to_str())
+            .map(|s| s.to_string()))
     }
 }
 
@@ -173,13 +276,6 @@ mod tests {
         let url = "https://github.com/user/my-skill/";
         let result = SkillInstaller::parse_github_url(url).unwrap();
         assert_eq!(result, "https://github.com/user/my-skill");
-    }
-
-    #[test]
-    fn test_extract_repo_name() {
-        let url = "https://github.com/user/my-skill";
-        let name = SkillInstaller::extract_repo_name(url).unwrap();
-        assert_eq!(name, "my-skill");
     }
 
     #[test]
