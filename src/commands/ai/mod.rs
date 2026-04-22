@@ -7,7 +7,9 @@ use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
 use crate::{APP_NAME, CONFIG_NAME};
 use crate::config::{Config};
-use crate::tools::{ToolRegistry, WebSearch, ReadFile, AskUser};
+use crate::tools::{ToolRegistry, WebSearch, ReadFile};
+#[allow(unused_imports)]
+use crate::tools::AskUser;
 use async_openai::types::{
     ChatCompletionRequestSystemMessageArgs,
     ChatCompletionRequestUserMessageArgs,

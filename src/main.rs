@@ -28,11 +28,26 @@ enum Commands {
     },
     /// List all available subcommands
     Cmds {},
+    /// Manage skills
+    #[command(subcommand)]
+    Skills(SkillsCommands),
     /// Generate shell completion scripts
     Completions {
         #[arg(value_enum)]
         shell: shells::Shell,
-    },}
+    },
+}
+
+#[derive(Debug, Subcommand)]
+enum SkillsCommands {
+    /// List installed skills
+    List {},
+    /// Install a skill from a GitHub repository
+    Add {
+        /// GitHub URL or user/repo shorthand
+        url: String,
+    },
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -66,6 +81,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let cmd = <Commands as clap::Subcommand>::augment_subcommands(clap::Command::new("shelly"));
             for sub in cmd.get_subcommands() {
                 println!("{}", sub.get_name());
+            }
+        }
+        Commands::Skills(skills_cmd) => {
+            match skills_cmd {
+                SkillsCommands::List {} => {
+                    if let Err(err) = commands::skills::list() {
+                        eprintln!("Failed to list skills: {:?}", err);
+                    }
+                }
+                SkillsCommands::Add { url } => {
+                    if let Err(err) = commands::skills::add(url).await {
+                        eprintln!("Failed to install skill: {:?}", err);
+                        std::process::exit(1);
+                    }
+                }
             }
         }
         Commands::Completions { shell } => {

@@ -131,6 +131,33 @@ This uses arrow-key navigation and prevents destructive mistakes.
 
 ---
 
+## Skills
+
+Shelly supports extensible skills to enhance command generation for specific domains.
+
+### View Installed Skills
+
+```bash
+shelly skills list
+```
+
+### Install a Skill
+
+Install skills from GitHub repositories:
+
+```bash
+# Full URL
+shelly skills add https://github.com/username/my-skill
+
+# Shorthand
+shelly skills add username/my-skill
+```
+
+Skills are downloaded, extracted, and validated (requires `SKILL.md` file)
+to `~/.config/shelly/skills/`.
+
+---
+
 ## Development Commands
 
 We use [`just`](https://github.com/casey/just) for common development tasks:
