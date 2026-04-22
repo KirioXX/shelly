@@ -130,9 +130,7 @@ impl SkillInstaller {
         // Validate SKILL.md exists
         let skill_md = extracted_dir.join("SKILL.md");
         if !skill_md.exists() {
-            return Err(format!(
-                "No SKILL.md found in repository. A valid skill requires a SKILL.md file."
-            )
+            return Err("No SKILL.md found in repository. A valid skill requires a SKILL.md file.".to_string()
             .into());
         }
 

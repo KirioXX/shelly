@@ -1,6 +1,18 @@
 use crate::skills::SkillManager;
 use console::style;
 use std::error::Error;
+use clap::{Subcommand};
+
+#[derive(Debug, Subcommand)]
+pub enum SkillsCommands {
+    /// List installed skills
+    List {},
+    /// Install a skill from a GitHub repository
+    Add {
+        /// GitHub URL or user/repo shorthand
+        url: String,
+    },
+}
 
 /// List all installed skills
 pub fn list() -> Result<(), Box<dyn Error>> {

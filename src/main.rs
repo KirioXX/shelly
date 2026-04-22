@@ -1,10 +1,10 @@
-use shelly::*;
+use shelly::{commands::skills::SkillsCommands, *};
 
 use std::error::Error;
 use std::io;
 
-use clap::{Parser, Subcommand, CommandFactory};
-use clap_complete::{generate, shells};
+use clap::{Parser, CommandFactory};
+use clap_complete::{generate};
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -12,41 +12,6 @@ use clap_complete::{generate, shells};
 struct Cli {
     #[command(subcommand)]
     command: Commands,
-}
-
-#[derive(Debug, Subcommand)]
-enum Commands {
-    /// Run the setup wizard
-    Setup {},
-    /// Generate shell commands from natural language
-    Generate {
-        #[arg(trailing_var_arg = true)]
-        prompt: Vec<String>,
-
-        #[arg(long, help = "Show command without executing")]
-        dry_run: bool,
-    },
-    /// List all available subcommands
-    Cmds {},
-    /// Manage skills
-    #[command(subcommand)]
-    Skills(SkillsCommands),
-    /// Generate shell completion scripts
-    Completions {
-        #[arg(value_enum)]
-        shell: shells::Shell,
-    },
-}
-
-#[derive(Debug, Subcommand)]
-enum SkillsCommands {
-    /// List installed skills
-    List {},
-    /// Install a skill from a GitHub repository
-    Add {
-        /// GitHub URL or user/repo shorthand
-        url: String,
-    },
 }
 
 #[tokio::main]
