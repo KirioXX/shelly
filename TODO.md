@@ -5,9 +5,9 @@
 ## 📋 Backlog
 
 ### Skills System
-- [ ] Support multiple skills in one session
-- [ ] Manual skill selection (`--skill <name>` flag)
-- [ ] Skill install command: `shelly skill add <url>`
+- [x] Support multiple skills in one session
+- [x] Manual skill selection (`--skills skill1,skill2` flag)
+- [x] Skill install command: `shelly skills add <url>` (supports multiple skills per repo with `--skill <name>` for specific skill)
 - [ ] Automatic skill installation (discover and install missing skills on demand)
 
 ### Shell & UX

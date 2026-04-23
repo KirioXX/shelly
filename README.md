@@ -7,7 +7,7 @@ A Rust-based terminal assistant that translates natural language prompts into sh
 - **Natural Language to Command**: Describe what you want, get the exact command
 - **Direct Buffer Injection**: Commands appear in your shell for review before running
 - **AI Tools**: Web search, file reading, automatic clarification for better context
-- **Smart Skill Matching**: Expert guidance for specific tasks (curl, docker, etc.)
+- **Smart Skill Matching**: Expert guidance for specific tasks, multiple skills can be active at once
 - **Shell Completions**: Tab completion for Bash, Zsh, Fish
 - **Zero-Leak Output**: Only the command goes to stdout
 
@@ -33,6 +33,7 @@ shelly setup
 ```bash
 shelly generate "list all docker containers"
 shelly generate --dry-run "delete old log files"
+shelly generate --skills safe-bash,backup "archive important files"
 ```
 
 ## Development

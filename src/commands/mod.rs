@@ -18,6 +18,9 @@ pub enum Commands {
 
         #[arg(long, help = "Show command without executing")]
         dry_run: bool,
+        
+        #[arg(long, help = "Comma-separated list of skills to use")]
+        skills: Option<String>,
     },
     /// List all available subcommands
     Cmds {},

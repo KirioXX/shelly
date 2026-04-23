@@ -35,8 +35,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Err(_err) => eprintln!("Setup failed")
             }
         }
-        Commands::Generate { prompt, dry_run } => {
-            match commands::ai::call(prompt, dry_run).await {
+        Commands::Generate { prompt, dry_run, skills } => {
+            match commands::ai::call(prompt, dry_run, skills).await {
                 Ok(command) => println!("{}", command),
                 Err(err) => println!("Failed: {:?}", err)
             }

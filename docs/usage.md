@@ -141,7 +141,7 @@ Shelly supports extensible skills to enhance command generation for specific dom
 shelly skills list
 ```
 
-### Install a Skill
+### Install Skills
 
 Install skills from GitHub repositories:
 
@@ -151,10 +151,32 @@ shelly skills add https://github.com/username/my-skill
 
 # Shorthand
 shelly skills add username/my-skill
+
+# Install specific skill from multi-skill repo
+shelly skills add username/my-skills-repo --skill my-specific-skill
 ```
 
 Skills are downloaded, extracted, and validated (requires `SKILL.md` file)
 to `~/.config/shelly/skills/`.
+
+### Using Skills
+
+Skills are automatically loaded when your prompt matches their description:
+
+```bash
+# Automatically uses matching skills
+shelly generate "create curl command for POST request"
+```
+
+Manually specify skills with `--skills`:
+
+```bash
+# Use a single skill
+shelly generate --skills safe-bash "delete old files"
+
+# Use multiple skills (comma-separated)
+shelly generate --skills safe-bash,backup "archive and compress logs"
+```
 
 ---
 

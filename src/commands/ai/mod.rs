@@ -38,7 +38,7 @@ fn create_tool_registry() -> ToolRegistry {
     registry
 }
 
-pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn Error>> {
+pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) -> Result<String, Box<dyn Error>> {
     let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
 
     if cfg.api_key.is_empty() {
@@ -46,7 +46,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool) -> Result<String, Box<dyn 
     }
 
     let full_prompt = prompt.join(" ");
-    let system_prompt = match system_prompt::get_system_prompt(&full_prompt, &cfg) {
+    let system_prompt = match system_prompt::get_system_prompt(&full_prompt, &cfg, &skills) {
         Ok(sp) => sp,
         Err(_err) => "".to_string(),
     };

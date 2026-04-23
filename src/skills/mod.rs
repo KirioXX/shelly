@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 pub mod installer;
 
+#[derive(Clone)]
 pub struct Skill {
     pub name: String,
     pub description: String,
@@ -137,6 +138,45 @@ impl SkillManager {
         }
 
         Ok(None)
+    }
+
+    /// Find all skills matching the prompt keywords
+    pub fn find_matching_skills(&self, prompt: &str) -> Result<Vec<Skill>, Box<dyn Error>> {
+        let prompt_lower = prompt.to_lowercase();
+        let skills = self.discover_skills()?;
+        let mut matching = Vec::new();
+
+        for skill in skills {
+            // Simple keyword matching
+            let keywords: Vec<String> = skill.description.to_lowercase()
+                .split_whitespace()
+                .filter(|w| w.len() > 3)
+                .map(|w| w.to_string())
+                .collect();
+
+            let matches = keywords.iter()
+                .any(|kw| prompt_lower.contains(kw));
+
+            if matches {
+                matching.push(skill);
+            }
+        }
+
+        Ok(matching)
+    }
+
+    /// Load skills by their names
+    pub fn load_skills_by_name(&self, names: &[String]) -> Result<Vec<Skill>, Box<dyn Error>> {
+        let all_skills = self.discover_skills()?;
+        let mut loaded = Vec::new();
+
+        for name in names {
+            if let Some(skill) = all_skills.iter().find(|s| &s.name == name) {
+                loaded.push(skill.clone());
+            }
+        }
+
+        Ok(loaded)
     }
 }
 
