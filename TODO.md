@@ -57,11 +57,10 @@
   - AI decides when to use tools based on prompts
 
 ### Skills
-- [x] Enable skills (shelly-specific in `~/.config/shelly/skills/`)
-  - Skill discovery and loading system
-  - Match prompts to skills by keywords in description
-  - Prepend skill instructions to system prompt
-  - Installed: `curl-command-generator` (copied from Pi skills)
+- [x] Progressive skill disclosure (lazy loading)
+  - System prompt only embeds `name` + `description` + `path` for matching skills
+  - AI uses `read_file` tool to load full skill content on demand
+  - Enables multi-file skills without context bloat, matching Anthropic Agent Skills pattern
 
 ---
 
