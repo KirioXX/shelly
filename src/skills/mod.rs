@@ -9,6 +9,7 @@ pub struct Skill {
     pub name: String,
     pub description: String,
     pub content: String,
+    pub path: PathBuf,
 }
 
 pub struct SkillManager {
@@ -114,6 +115,7 @@ impl SkillManager {
             name,
             description,
             content: body_lines.join("\n"),
+            path: path.clone(),
         }))
     }
 
@@ -221,6 +223,7 @@ This is a test skill.
         assert_eq!(skill.name, "test-skill");
         assert_eq!(skill.description, "Use when testing");
         assert!(skill.content.contains("# Test Skill"));
+        assert_eq!(skill.path, skill_file);
     }
 
     #[test]
