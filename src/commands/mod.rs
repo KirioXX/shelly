@@ -16,7 +16,7 @@ pub enum Commands {
         #[arg(trailing_var_arg = true)]
         prompt: Vec<String>,
 
-        #[arg(long, help = "Show command without executing")]
+        #[arg(short = 'd', long, help = "Show command without executing")]
         dry_run: bool,
         
         #[arg(long, help = "Comma-separated list of skills to use")]
