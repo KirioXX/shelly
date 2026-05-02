@@ -9,7 +9,7 @@ fn test_cli_help() {
         .args(["run", "--quiet", "--", "--help"])
         .output()
         .expect("Failed to execute command");
-    
+
     assert!(output.status.success(), "--help should succeed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("shelly"), "Help should mention shelly");
@@ -23,7 +23,7 @@ fn test_cli_cmds_subcommand() {
         .args(["run", "--quiet", "--", "cmds"])
         .output()
         .expect("Failed to execute command");
-    
+
     assert!(output.status.success(), "cmds should succeed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("setup"), "cmds should list setup");
@@ -37,10 +37,27 @@ fn test_cli_version() {
         .args(["run", "--quiet", "--", "--version"])
         .output()
         .expect("Failed to execute command");
-    
+
     assert!(output.status.success(), "--version should succeed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(!stdout.is_empty(), "Version should output something");
+}
+
+/// Test that generate dry-run has a short alias
+#[test]
+fn test_generate_dry_run_short_alias() {
+    let output = Command::new("cargo")
+        .args(["run", "--quiet", "--", "generate", "--help"])
+        .output()
+        .expect("Failed to execute command");
+
+    assert!(output.status.success(), "generate --help should succeed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("-d, --dry-run"),
+        "generate help should show -d as an alias for --dry-run; got:\n{}",
+        stdout
+    );
 }
 
 /// Test that completions zsh works (smoke test)
@@ -50,7 +67,7 @@ fn test_cli_completions() {
         .args(["run", "--quiet", "--", "completions", "zsh"])
         .output()
         .expect("Failed to execute command");
-    
+
     assert!(output.status.success(), "completions should succeed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(!stdout.is_empty(), "Completions should output something");

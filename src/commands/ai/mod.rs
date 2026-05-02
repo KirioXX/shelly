@@ -10,17 +10,54 @@ use crate::config::{Config};
 use crate::tools::{ToolRegistry, WebSearch, ReadFile};
 #[allow(unused_imports)]
 use crate::tools::AskUser;
-use async_openai::types::{
+use async_openai::types::chat::{
+    ChatCompletionRequestAssistantMessageArgs,
+    ChatCompletionRequestMessage,
     ChatCompletionRequestSystemMessageArgs,
+    ChatCompletionRequestToolMessageArgs,
     ChatCompletionRequestUserMessageArgs,
-    CreateChatCompletionRequestArgs
+    ChatCompletionToolChoiceOption,
+    ChatCompletionMessageToolCalls,
+    CreateChatCompletionRequestArgs,
+    ResponseFormat,
+    ResponseFormatJsonSchema,
+    ToolChoiceOptions,
 };
 use async_openai::{
     config::OpenAIConfig,
     Client,
 };
+use serde::Deserialize;
 use serde_json::Value;
 
+#[derive(Debug, Deserialize)]
+struct AiResponse {
+    command: String,
+    warning: Option<String>,
+}
+
+fn parse_ai_response(text: &str) -> Result<AiResponse, Box<dyn Error>> {
+    Ok(serde_json::from_str::<AiResponse>(text.trim())?)
+}
+
+fn build_schema() -> Value {
+    serde_json::json!({
+        "type": "object",
+        "description": "A structured response containing the shell command to execute and an optional safety warning.",
+        "properties": {
+            "command": {
+                "type": "string",
+                "description": "The exact shell command to execute. Return only the command text, without markdown fences, explanations, or surrounding quotes."
+            },
+            "warning": {
+                "type": ["string", "null"],
+                "description": "A concise safety warning when the command is destructive, irreversible, may expose secrets, or otherwise needs user caution. Use null when no warning is needed."
+            }
+        },
+        "required": ["command", "warning"],
+        "additionalProperties": false
+    })
+}
 
 fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
   Client::with_config(
@@ -56,7 +93,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
     let tools = registry.to_function_definitions();
 
     // Build initial messages
-    let mut messages: Vec<async_openai::types::ChatCompletionRequestMessage> = vec![
+    let mut messages: Vec<ChatCompletionRequestMessage> = vec![
         ChatCompletionRequestSystemMessageArgs::default()
             .content(system_prompt)
             .build()?
@@ -80,6 +117,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
     let mut tool_calls_count = 0;
     let max_tool_calls = 3;
     let final_command;
+    let schema = build_schema();
 
     loop {
         // Build request - handle tools conditionally
@@ -89,13 +127,29 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
                 .model(cfg.model.clone())
                 .messages(messages.clone())
                 .tools(tools.clone())
-                .tool_choice("auto")
+                .tool_choice(ChatCompletionToolChoiceOption::Mode(ToolChoiceOptions::Auto))
+                .response_format(ResponseFormat::JsonSchema {
+                    json_schema: ResponseFormatJsonSchema {
+                        description: Some("Shell command with optional warning".to_string()),
+                        name: "shelly_command".to_string(),
+                        schema: Some(schema.clone()),
+                        strict: Some(true),
+                    },
+                })
                 .build()?
         } else {
             CreateChatCompletionRequestArgs::default()
                 .max_tokens(512u32)
                 .model(cfg.model.clone())
                 .messages(messages.clone())
+                .response_format(ResponseFormat::JsonSchema {
+                    json_schema: ResponseFormatJsonSchema {
+                        description: Some("Shell command with optional warning".to_string()),
+                        name: "shelly_command".to_string(),
+                        schema: Some(schema.clone()),
+                        strict: Some(true),
+                    },
+                })
                 .build()?
         };
         let response = match client.chat().create(request).await {
@@ -117,50 +171,58 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
         // Check if AI wants to call tools
         if let Some(tool_calls) = &choice.message.tool_calls {
             if !tool_calls.is_empty() && tool_calls_count < max_tool_calls {
-                // AI wants to call tools
-                tool_calls_count += 1;
-                pb.set_message(format!("Using tools ({}/{})...", tool_calls_count, max_tool_calls));
+                // Collect function tool calls only
+                let function_tool_calls: Vec<_> = tool_calls.iter().filter_map(|tc| match tc {
+                    ChatCompletionMessageToolCalls::Function(fc) => Some(fc.clone()),
+                    _ => None,
+                }).collect();
 
-                // Add assistant message with tool calls
-                let assistant_msg = async_openai::types::ChatCompletionRequestAssistantMessageArgs::default()
-                    .content(choice.message.content.clone().unwrap_or_default())
-                    .tool_calls(choice.message.tool_calls.clone().unwrap_or_default())
-                    .build()?;
-                messages.push(assistant_msg.into());
+                if !function_tool_calls.is_empty() {
+                    // AI wants to call tools
+                    tool_calls_count += 1;
+                    pb.set_message(format!("Using tools ({}/{})...", tool_calls_count, max_tool_calls));
 
-                // Execute each tool call and add results
-                for tool_call in tool_calls {
-                    let function_call = &tool_call.function;
-                    let tool_name = &function_call.name;
-                    let tool_args: Value = serde_json::from_str(&function_call.arguments)?;
+                    // Add assistant message with tool calls
+                    let assistant_msg = ChatCompletionRequestAssistantMessageArgs::default()
+                        .content(choice.message.content.clone().unwrap_or_default())
+                        .tool_calls(choice.message.tool_calls.clone().unwrap_or_default())
+                        .build()?;
+                    messages.push(assistant_msg.into());
 
-                    // Log tool usage similar to skills
-                    eprintln!("{}", style(format!("🔧 Using tool: {}", tool_name)).cyan());
+                    // Execute each tool call and add results
+                    for tool_call in &function_tool_calls {
+                        let function_call = &tool_call.function;
+                        let tool_name = &function_call.name;
+                        let tool_args: Value = serde_json::from_str(&function_call.arguments)?;
 
-                    // Execute the tool
-                    let result = if let Some(tool) = registry.get(tool_name) {
-                        match tool.execute(tool_args).await {
-                            Ok(output) => output,
-                            Err(e) => format!("Error: {}", e),
-                        }
-                    } else {
-                        format!("Error: Tool '{}' not found", tool_name)
-                    };
+                        // Log tool usage similar to skills
+                        eprintln!("{}", style(format!("🔧 Using tool: {}", tool_name)).cyan());
 
-                    // Add tool result to messages
-                    messages.push(
-                        async_openai::types::ChatCompletionRequestToolMessageArgs::default()
-                            .content(result)
-                            .tool_call_id(tool_call.id.clone())
-                            .build()?
-                            .into()
-                    );
+                        // Execute the tool
+                        let result = if let Some(tool) = registry.get(tool_name) {
+                            match tool.execute(tool_args).await {
+                                Ok(output) => output,
+                                Err(e) => format!("Error: {}", e),
+                            }
+                        } else {
+                            format!("Error: Tool '{}' not found", tool_name)
+                        };
+
+                        // Add tool result to messages
+                        messages.push(
+                            ChatCompletionRequestToolMessageArgs::default()
+                                .content(result)
+                                .tool_call_id(tool_call.id.clone())
+                                .build()?
+                                .into()
+                        );
+                    }
+                    continue;
                 }
-            } else {
-                // Max tool calls reached or no tools to call
-                final_command = choice.message.content.clone();
-                break;
             }
+            // Max tool calls reached or no function tools to call
+            final_command = choice.message.content.clone();
+            break;
         } else {
             // AI gave direct response
             final_command = choice.message.content.clone();
@@ -170,13 +232,26 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
 
     pb.finish_and_clear();
 
-    let command = final_command
+    let raw = final_command
         .ok_or("AI returned no command")?
         .trim()
         .to_string();
 
+    if raw.is_empty() {
+        return Err("AI returned empty command. Please try with a different prompt.".into());
+    }
+
+    let parsed = parse_ai_response(&raw)?;
+    let command = parsed.command.trim().to_string();
+
     if command.is_empty() {
         return Err("AI returned empty command. Please try with a different prompt.".into());
+    }
+
+    if let Some(warning) = parsed.warning
+        && !warning.trim().is_empty()
+    {
+        eprintln!("{}", style(format!("⚠️  Warning: {}", warning.trim())).red().bold());
     }
 
     if dry_run {
@@ -191,5 +266,43 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
         eprintln!("{}", style("✓ Command generated").green().bold());
         // Command goes to stdout for shell injection, no extra formatting needed
         Ok(command)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_json_command_with_warning() {
+        let result = parse_ai_response(r#"{"command": "rm -rf /", "warning": "dangerous"}"#).unwrap();
+        assert_eq!(result.command, "rm -rf /");
+        assert_eq!(result.warning, Some("dangerous".to_string()));
+    }
+
+    #[test]
+    fn test_parse_json_command_with_null_warning() {
+        let result = parse_ai_response(r#"{"command": "echo hello", "warning": null}"#).unwrap();
+        assert_eq!(result.command, "echo hello");
+        assert_eq!(result.warning, None);
+    }
+
+    #[test]
+    fn test_parse_rejects_plain_command() {
+        assert!(parse_ai_response("ls -la").is_err());
+    }
+
+    #[test]
+    fn test_parse_rejects_markdown_fence() {
+        assert!(parse_ai_response("```json\n{\"command\": \"ls\", \"warning\": null}\n```").is_err());
+    }
+
+    #[test]
+    fn test_schema_requires_nullable_warning() {
+        let schema = build_schema();
+        assert_eq!(schema["required"], serde_json::json!(["command", "warning"]));
+        assert_eq!(schema["properties"]["warning"]["type"], serde_json::json!(["string", "null"]));
+        assert!(schema["properties"]["command"]["description"].is_string());
+        assert!(schema["properties"]["warning"]["description"].is_string());
     }
 }

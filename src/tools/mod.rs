@@ -1,6 +1,8 @@
 use async_trait::async_trait;
 use serde_json::Value;
 use std::collections::HashMap;
+use async_openai::types::chat::ChatCompletionTools;
+use async_openai::types::chat::FunctionObject;
 
 /// A tool that the AI can call
 #[async_trait]
@@ -39,18 +41,18 @@ impl ToolRegistry {
     }
     
     /// Generate function definitions for OpenAI
-    pub fn to_function_definitions(&self) -> Vec<async_openai::types::ChatCompletionTool> {
+    pub fn to_function_definitions(&self) -> Vec<ChatCompletionTools> {
         self.tools.values()
             .map(|tool| {
-                let function = async_openai::types::FunctionObject {
+                let function = FunctionObject {
                     name: tool.name().to_string(),
                     description: Some(tool.description().to_string()),
                     parameters: Some(tool.parameters()),
+                    strict: None,
                 };
-                async_openai::types::ChatCompletionTool {
-                    r#type: async_openai::types::ChatCompletionToolType::Function,
-                    function,
-                }
+                ChatCompletionTools::Function(
+                    async_openai::types::chat::ChatCompletionTool { function }
+                )
             })
             .collect()
     }
