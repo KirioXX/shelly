@@ -1,0 +1,5 @@
+{
+  "defaultModel": "kimi-k2.6:cloud",
+  "defaultProvider": "ollama",
+  "defaultThinkingLevel": "medium"
+}
