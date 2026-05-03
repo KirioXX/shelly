@@ -1,5 +1,6 @@
 {
   "defaultModel": "kimi-k2.6:cloud",
   "defaultProvider": "ollama",
-  "defaultThinkingLevel": "medium"
+  "defaultThinkingLevel": "medium",
+  "lastChangelogVersion": "0.71.1"
 }
