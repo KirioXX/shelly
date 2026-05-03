@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug shelly",
+      "cargo": {
+        "args": ["build", "--bin", "shelly"],
+        "filter": {
+          "name": "shelly",
+          "kind": "bin"
+        }
+      },
+      "args": ["generate", "${input:shellyPrompt}", "--dry-run"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "RUST_BACKTRACE": "1"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "shellyPrompt",
+      "type": "promptString",
+      "description": "Shelly prompt",
+      "default": "list files sorted by size"
+    }
+  ]
+}
