@@ -25,8 +25,14 @@ just install  # Or: cp target/release/shelly ~/.cargo/bin/
 
 ```bash
 shelly setup
-# Follow the wizard to configure your AI provider and shell
 ```
+
+The wizard will:
+
+1. **Configure your AI provider** — Model, API URL, and API key saved to `~/.config/shelly/config.toml`
+2. **Install the shell wrapper** — Detects Bash/Zsh/Fish and appends a function to your shell config that captures Shelly's output and injects it directly into your terminal buffer
+
+> ⚠️ The shell wrapper is essential for the "commands appear in your shell for review" experience. Without it, you'll need to copy-paste output manually.
 
 ### Usage
 
@@ -40,14 +46,14 @@ shelly generate --skills safe-bash,backup "archive important files"
 
 ```bash
 just          # See all available commands
-just build    # Build release binary  
+just build    # Build release binary
 just test     # Run tests
 ```
 
 ## Documentation
 
 - [📖 Usage Guide](docs/usage.md) - Complete usage documentation
-- [🎯 Skills](docs/skills.md) - Skills system documentation  
+- [🎯 Skills](docs/skills.md) - Skills system documentation
 - [🔧 AI Tools](docs/usage.md#ai-tools) - Web search, file reading
 - [❓ Interactive Clarification](docs/usage.md#interactive-clarification) - When AI needs help
 - [⌨️ Shell Completions](docs/usage.md#shell-completions) - Tab completion setup
@@ -55,6 +61,7 @@ just test     # Run tests
 ## Architecture
 
 Shelly is built with:
+
 - **Rust** + **Tokio** - Async runtime
 - **Clap** - CLI parsing with completions
 - **Async-openai** - AI API communication
