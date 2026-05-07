@@ -108,7 +108,7 @@ fn create_tool_registry() -> ToolRegistry {
     let mut registry = ToolRegistry::new();
     registry.register(WebSearch);
     registry.register(ReadFile);
-    // registry.register(AskUser);  // Temporarily disabled - requires API with tool support
+    registry.register(AskUser);
     registry
 }
 
@@ -141,15 +141,6 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
             .into(),
     ];
 
-    let pb = ProgressBar::new_spinner();
-    pb.set_style(
-        ProgressStyle::default_spinner()
-            .template("{spinner:.green} {msg}")?
-            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ "),
-    );
-    pb.set_message("Thinking...");
-    pb.enable_steady_tick(std::time::Duration::from_millis(100));
-
     // Tool calling loop (max 3 iterations)
     let mut tool_calls_count = 0;
     let max_tool_calls = 3;
@@ -157,6 +148,17 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
     let schema = build_schema();
 
     loop {
+        // Create a fresh spinner for each AI call.
+        // We stop it before tool execution so interactive tools (ask_user)
+        // get full TTY control.
+        let pb = ProgressBar::new_spinner();
+        pb.set_style(
+            ProgressStyle::default_spinner()
+                .template("{spinner:.green} {msg}")?
+                .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ "),
+        );
+        pb.set_message("Thinking...");
+        pb.enable_steady_tick(std::time::Duration::from_millis(100));
         // Build request - handle tools conditionally
         let request = if tool_calls_count < max_tool_calls && !tools.is_empty() {
             CreateChatCompletionRequestArgs::default()
@@ -217,7 +219,10 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
                 if !function_tool_calls.is_empty() {
                     // AI wants to call tools
                     tool_calls_count += 1;
-                    pb.set_message(format!("Using tools ({}/{})...", tool_calls_count, max_tool_calls));
+
+                    // Stop the spinner before tool execution so interactive
+                    // tools (ask_user) get full TTY control.
+                    pb.finish_and_clear();
 
                     // Add assistant message with tool calls
                     let assistant_msg = ChatCompletionRequestAssistantMessageArgs::default()
@@ -266,8 +271,6 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
             break;
         }
     }
-
-    pb.finish_and_clear();
 
     let raw = final_command
         .ok_or("AI returned no command")?
