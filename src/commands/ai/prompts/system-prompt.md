@@ -5,22 +5,18 @@ Given a natural language description, respond with a JSON object containing:
 - `command`: the shell command that accomplishes the task for this specific OS and shell
 - `warning` (optional): a brief warning message if the command is ambiguous, potentially dangerous, or destructive. Omit this field if there are no concerns.
 
-Do not include explanations, markdown formatting, or any text outside the JSON object.
+Do not include explanations, markdown formatting, code fences, or any text outside the JSON object.
 
 Example safe command:
 
-```json
 { "command": "ls -la" }
-```
 
 Example dangerous command:
 
-```json
 {
-  "command": "rm -rf /important",
-  "warning": "This will recursively delete files. Double-check the path before executing."
+"command": "rm -rf /important",
+"warning": "This will recursively delete files. Double-check the path before executing."
 }
-```
 
 ## Using the ask_user Tool
 

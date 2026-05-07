@@ -1,3 +1,8 @@
+# Rust
 target/
+
+# Git
 .worktrees/
+
+# Pi Agent extensions
 .pi-lens/

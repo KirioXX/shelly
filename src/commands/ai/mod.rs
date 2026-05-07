@@ -37,7 +37,44 @@ struct AiResponse {
 }
 
 fn parse_ai_response(text: &str) -> Result<AiResponse, Box<dyn Error>> {
-    Ok(serde_json::from_str::<AiResponse>(text.trim())?)
+    let cleaned = strip_markdown_fences(text.trim());
+    Ok(serde_json::from_str::<AiResponse>(cleaned)?)
+}
+
+/// Strip markdown code fences (```json ... ``` or ``` ... ```)
+/// and return the inner content.
+///
+/// Handles these cases:
+/// - Bare JSON (no fences) → trimmed text
+/// - Fenced JSON at start → content between fences
+/// - Fenced JSON with text before/after → content between fences
+/// - Unclosed opening fence → everything after the fence
+fn strip_markdown_fences(text: &str) -> &str {
+    if let Some(start) = text.find("```") {
+        let after_fence = &text[start + 3..];
+
+        // Skip optional language tag (json, text, etc.)
+        let content_start = if after_fence.starts_with("json") || after_fence.starts_with("text") {
+            after_fence[4..].trim_start()
+        } else {
+            after_fence.trim_start()
+        };
+
+        // If the fence was at the end with nothing after it, return content before fence
+        if content_start.is_empty() {
+            return text[..start].trim();
+        }
+
+        // Find the closing fence
+        if let Some(end) = content_start.find("```") {
+            return content_start[..end].trim();
+        }
+
+        // No closing fence — return everything after the opening fence
+        return content_start.trim();
+    }
+
+    text.trim()
 }
 
 fn build_schema() -> Value {
@@ -292,9 +329,85 @@ mod tests {
         assert!(parse_ai_response("ls -la").is_err());
     }
 
+    // ---- Graceful markdown-fence handling ----
     #[test]
-    fn test_parse_rejects_markdown_fence() {
-        assert!(parse_ai_response("```json\n{\"command\": \"ls\", \"warning\": null}\n```").is_err());
+    fn test_parse_strips_json_fence() {
+        let input = r#"```json
+{"command": "ls -la", "warning": null}
+```"#;
+        let result = parse_ai_response(input).unwrap();
+        assert_eq!(result.command, "ls -la");
+        assert_eq!(result.warning, None);
+    }
+
+    #[test]
+    fn test_parse_strips_plain_fence() {
+        let input = r#"```
+{"command": "cd /tmp", "warning": null}
+```"#;
+        let result = parse_ai_response(input).unwrap();
+        assert_eq!(result.command, "cd /tmp");
+    }
+
+    #[test]
+    fn test_parse_with_leading_trailing_whitespace_in_fence() {
+        let input = r#"
+
+```json
+
+  {"command": "pwd", "warning": null}  
+
+```
+
+"#;
+        let result = parse_ai_response(input).unwrap();
+        assert_eq!(result.command, "pwd");
+    }
+
+    #[test]
+    fn test_parse_with_inline_text_around_fence() {
+        let input = r#"Here is your command:
+```json
+{"command": "git status", "warning": null}
+```
+Enjoy!"#;
+        let result = parse_ai_response(input).unwrap();
+        assert_eq!(result.command, "git status");
+    }
+
+    // ---- strip_markdown_fences unit tests ----
+    #[test]
+    fn test_strip_no_fence() {
+        assert_eq!(strip_markdown_fences("hello"), "hello");
+    }
+
+    #[test]
+    fn test_strip_json_fence() {
+        assert_eq!(
+            strip_markdown_fences("```json\nfoo\n```"),
+            "foo"
+        );
+    }
+
+    #[test]
+    fn test_strip_plain_fence() {
+        assert_eq!(strip_markdown_fences("```\nbar\n```"), "bar");
+    }
+
+    #[test]
+    fn test_strip_only_open_fence() {
+        assert_eq!(strip_markdown_fences("```json\nfoo"), "foo");
+    }
+
+    #[test]
+    fn test_strip_closing_fence_at_end() {
+        // Edge case: only a closing fence — return content before it
+        assert_eq!(strip_markdown_fences("foo\n```"), "foo");
+    }
+
+    #[test]
+    fn test_strip_text_before_fence() {
+        assert_eq!(strip_markdown_fences("intro\n```json\ncontent\n```\noutro"), "content");
     }
 
     #[test]
