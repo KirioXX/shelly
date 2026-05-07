@@ -1,4 +1,5 @@
 pub mod ai;
+pub mod config;
 pub mod setup;
 pub mod skills;
 
@@ -31,5 +32,11 @@ pub enum Commands {
     Completions {
         #[arg(value_enum)]
         shell: shells::Shell,
+    },
+    /// View or edit configuration
+    Config {
+        /// Display config without editing
+        #[arg(short, long)]
+        show: bool,
     },
 }

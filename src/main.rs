@@ -68,6 +68,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let name = cmd.get_name().to_string();
             generate(shell, &mut cmd, name, &mut io::stdout());
         }
+        Commands::Config { show } => {
+            if let Err(err) = commands::config::config(show) {
+                eprintln!("Failed to show/edit config: {:?}", err);
+                std::process::exit(1);
+            }
+        }
     }
     Ok(())
 }

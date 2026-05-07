@@ -72,3 +72,37 @@ fn test_cli_completions() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(!stdout.is_empty(), "Completions should output something");
 }
+
+/// Test that config --help lists the --show flag (smoke test)
+#[test]
+fn test_cli_config_help() {
+    let output = Command::new("cargo")
+        .args(["run", "--quiet", "--", "config", "--help"])
+        .output()
+        .expect("Failed to execute command");
+
+    assert!(output.status.success(), "config --help should succeed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("--show"),
+        "config help should list --show; got:\n{}",
+        stdout
+    );
+}
+
+/// Test that config --show works with default/empty config (smoke test)
+#[test]
+fn test_cli_config_show() {
+    let output = Command::new("cargo")
+        .args(["run", "--quiet", "--", "config", "--show"])
+        .output()
+        .expect("Failed to execute command");
+
+    assert!(output.status.success(), "config --show should succeed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("Current configuration"),
+        "config --show should display config; got:\n{}",
+        stdout
+    );
+}
