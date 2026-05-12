@@ -11,25 +11,25 @@
 
 All documentation, planning, and project knowledge lives in `01 - Projects/Shelly/`:
 
-| Note | What's in it | Why you'd read it |
-|---|---|---|
-| `0. Index.md` | Project hub, quick facts, tech stack, entry points | Get oriented |
-| `Kanban.md` | **Board** — backlog, in-progress, done, archive | Know what's active |
-| `Architecture.md` | Mermaid diagrams, module breakdown, data flow | Understand internals |
-| `Changelog.md` | Feature timeline with commit hashes | Trace history |
-| `Usage Guide.md` | User-facing CLI guide (setup, usage, skills, completions) | How the tool works |
-| `Skills Guide.md` | Skills system — install, format, matching, creation | Skill system context |
-| `Plan - *.md` | Implementation plans for new features | Before building a feature |
-| `Plans/` | Archived implementation plans (historical) | Past decisions |
+| Note              | What's in it                                              | Why you'd read it         |
+| ----------------- | --------------------------------------------------------- | ------------------------- |
+| `0. Index.md`     | Project hub, quick facts, tech stack, entry points        | Get oriented              |
+| `Kanban.md`       | **Board** — backlog, in-progress, done, archive           | Know what's active        |
+| `Architecture.md` | Mermaid diagrams, module breakdown, data flow             | Understand internals      |
+| `Changelog.md`    | Feature timeline with commit hashes                       | Trace history             |
+| `Usage Guide.md`  | User-facing CLI guide (setup, usage, skills, completions) | How the tool works        |
+| `Skills Guide.md` | Skills system — install, format, matching, creation       | Skill system context      |
+| `Plan - *.md`     | Implementation plans for new features                     | Before building a feature |
+| `Plans/`          | Archived implementation plans (historical)                | Past decisions            |
 
 ### In the Repo (code only)
 
-| File | What's in it |
-|---|---|
+| File        | What's in it                                    |
+| ----------- | ----------------------------------------------- |
 | `README.md` | Elevator pitch, quick start, link to vault docs |
-| `AGENT.md` | This file — agent onboarding |
-| `src/` | Source code |
-| `tests/` | Test files |
+| `AGENT.md`  | This file — agent onboarding                    |
+| `src/`      | Source code                                     |
+| `tests/`    | Test files                                      |
 
 **Rule:** Before writing code, read the relevant plan in the vault. After writing code, update the **Kanban** and **Changelog**.
 
@@ -39,10 +39,10 @@ All documentation, planning, and project knowledge lives in `01 - Projects/Shell
 
 **All active planning lives in the Obsidian vault.**
 
-| Note | Purpose |
-|---|---|
-| `01 - Projects/Shelly/Kanban.md` | **Kanban board** — backlog, in-progress, done |
-| `01 - Projects/Shelly/Plan - *.md` | Implementation plans for new features |
+| Note                               | Purpose                                       |
+| ---------------------------------- | --------------------------------------------- |
+| `01 - Projects/Shelly/Kanban.md`   | **Kanban board** — backlog, in-progress, done |
+| `01 - Projects/Shelly/Plan - *.md` | Implementation plans for new features         |
 
 **Rule:** Before starting work, check the Kanban. After completing work, move the task to ✅ Done.
 
@@ -79,7 +79,7 @@ Only the final `command` string reaches stdout. Everything else (spinners, reaso
 | `src/tools/mod.rs`                         | `Tool` trait + `ToolRegistry`                   |
 | `src/tools/web_search.rs`                  | DuckDuckGo search tool                          |
 | `src/tools/read_file.rs`                   | File read tool (security scoped)                |
-| `src/tools/ask_user.rs`                    | Interactive clarification tool                    |
+| `src/tools/ask_user.rs`                    | Interactive clarification tool                  |
 | `src/skills/mod.rs`                        | `Skill` struct, parsing, discovery, matching    |
 | `src/skills/installer.rs`                  | GitHub download + validation                    |
 | `tests/cli_smoke_test.rs`                  | CLI smoke tests                                 |
