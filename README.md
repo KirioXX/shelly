@@ -1,4 +1,4 @@
-# 🐚 Shelly
+# 🐚 shelly
 
 A Rust-based terminal assistant that translates natural language prompts into shell commands and injects them directly into your shell's editing buffer.
 

@@ -1,6 +1,6 @@
-# 🤖 Agent Guide — Shelly
+# 🤖 Agent Guide — shelly
 
-> This file is for **AI coding assistants** working on the Shelly project.
+> This file is for **AI coding assistants** working on the shelly project.
 > It supplements the user-facing docs (`README.md`, `docs/usage.md`, `docs/skills.md`).
 
 ---
@@ -91,7 +91,7 @@ Only the final `command` string reaches stdout. Everything else (spinners, reaso
 
 ### Before starting a task
 
-1. Read the **Kanban** (`01 - Projects/Shelly/Kanban.md`) for current priorities
+1. Read the **Kanban** (`01 - Projects/shelly/Kanban.md`) for current priorities
 2. Read `Usage Guide.md` and `Skills Guide.md` in Obsidian for user-facing context
 3. Read `Architecture.md` in Obsidian if the change touches core flows
 4. Run `just test` to establish a green baseline
