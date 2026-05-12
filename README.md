@@ -34,6 +34,13 @@ The wizard will:
 
 > ⚠️ The shell wrapper is essential for the "commands appear in your shell for review" experience. Without it, you'll need to copy-paste output manually.
 
+### Tweak settings later
+
+```bash
+shelly config        # View or edit config interactively
+shelly config --show # Display only, no prompts
+```
+
 ### Usage
 
 ```bash
@@ -53,6 +60,7 @@ just test     # Run tests
 ## Documentation
 
 - [📖 Usage Guide](docs/usage.md) - Complete usage documentation
+- [⚙️ Config](docs/usage.md#config) - View/edit settings without re-running setup
 - [🎯 Skills](docs/skills.md) - Skills system documentation
 - [🔧 AI Tools](docs/usage.md#ai-tools) - Web search, file reading
 - [❓ Interactive Clarification](docs/usage.md#interactive-clarification) - When AI needs help

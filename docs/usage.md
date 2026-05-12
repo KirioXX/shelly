@@ -5,6 +5,7 @@ Complete guide to using shelly effectively.
 ## Table of Contents
 
 - [Setup](#setup)
+- [Config](#config)
 - [Basic Usage](#basic-usage)
 - [Dry-Run Mode](#dry-run-mode)
 - [List Available Commands](#list-available-commands)
@@ -92,6 +93,40 @@ source ~/.bashrc   # or ~/.zshrc
 
 ---
 
+## Config
+
+View or edit your configuration without re-running the full setup wizard:
+
+```bash
+shelly config        # Show config, ask if you want to edit
+shelly config --show # Display only, no prompts
+```
+
+**What it shows:**
+
+```
+Current configuration:
+
+  Model:   claude-3-5-sonnet
+  API URL: https://api.openai.com/v1
+  API Key: sk-ab****wxyz
+  Shell:   Zsh
+```
+
+Your API key is **masked** for safety (only a prefix and suffix are visible).
+
+**What you can edit:**
+- AI model
+- API endpoint URL
+- API key (asked separately — skip if you don't want to change it)
+- Shell type
+
+Changes are saved to `~/.config/shelly/config.toml`.
+
+> 💡 Unlike `shelly setup`, `shelly config` **never touches your shell config files** (`.bashrc`, `.zshrc`, etc.). Use it when you only need to tweak settings.
+
+---
+
 ## Basic Usage
 
 Simply describe the command you need:
@@ -129,6 +164,7 @@ shelly cmds
 This outputs:
 
 - `setup` - Run the setup wizard
+- `config` - View or edit configuration
 - `generate` - Generate shell commands from natural language
 - `cmds` - List all available commands
 - `completions` - Generate shell completion scripts
