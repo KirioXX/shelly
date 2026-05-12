@@ -59,12 +59,14 @@ just test     # Run tests
 
 ## Documentation
 
-- [📖 Usage Guide](docs/usage.md) - Complete usage documentation
-- [⚙️ Config](docs/usage.md#config) - View/edit settings without re-running setup
-- [🎯 Skills](docs/skills.md) - Skills system documentation
-- [🔧 AI Tools](docs/usage.md#ai-tools) - Web search, file reading
-- [❓ Interactive Clarification](docs/usage.md#interactive-clarification) - When AI needs help
-- [⌨️ Shell Completions](docs/usage.md#shell-completions) - Tab completion setup
+All documentation lives in the Obsidian vault under `01 - Projects/Shelly/`:
+
+- [[01 - Projects/Shelly/Usage Guide|📖 Usage Guide]] — Complete usage documentation
+- [[01 - Projects/Shelly/0. Index|🏠 Project Hub]] — Quick facts, tech stack, entry points
+- [[01 - Projects/Shelly/Kanban|📋 Kanban Board]] — Current status, backlog, done
+- [[01 - Projects/Shelly/Architecture|🏗️ Architecture]] — Mermaid diagrams, module breakdown
+- [[01 - Projects/Shelly/Changelog|📜 Changelog]] — Feature timeline with commits
+- [[01 - Projects/Shelly/Skills Guide|🎯 Skills]] — Skills system documentation
 
 ## Architecture
 

@@ -5,16 +5,44 @@
 
 ---
 
+## 📚 Where to Find Information
+
+### In the Obsidian Vault (single source of truth)
+
+All documentation, planning, and project knowledge lives in `01 - Projects/Shelly/`:
+
+| Note | What's in it | Why you'd read it |
+|---|---|---|
+| `0. Index.md` | Project hub, quick facts, tech stack, entry points | Get oriented |
+| `Kanban.md` | **Board** — backlog, in-progress, done, archive | Know what's active |
+| `Architecture.md` | Mermaid diagrams, module breakdown, data flow | Understand internals |
+| `Changelog.md` | Feature timeline with commit hashes | Trace history |
+| `Usage Guide.md` | User-facing CLI guide (setup, usage, skills, completions) | How the tool works |
+| `Skills Guide.md` | Skills system — install, format, matching, creation | Skill system context |
+| `Plan - *.md` | Implementation plans for new features | Before building a feature |
+| `Plans/` | Archived implementation plans (historical) | Past decisions |
+
+### In the Repo (code only)
+
+| File | What's in it |
+|---|---|
+| `README.md` | Elevator pitch, quick start, link to vault docs |
+| `AGENT.md` | This file — agent onboarding |
+| `src/` | Source code |
+| `tests/` | Test files |
+
+**Rule:** Before writing code, read the relevant plan in the vault. After writing code, update the **Kanban** and **Changelog**.
+
+---
+
 ## 📋 Planning & Progress
 
 **All active planning lives in the Obsidian vault.**
 
-| Note                                   | Purpose                                            |
-| -------------------------------------- | -------------------------------------------------- |
-| `01 - Projects/Shelly/0. Index.md`     | Project hub — status, quick links, entry points    |
-| `01 - Projects/Shelly/Kanban.md`       | **Kanban board** — backlog, in-progress, done      |
-| `01 - Projects/Shelly/Architecture.md` | Architecture diagrams (Mermaid) & module breakdown |
-| `01 - Projects/Shelly/Changelog.md`    | Feature timeline with commit refs                  |
+| Note | Purpose |
+|---|---|
+| `01 - Projects/Shelly/Kanban.md` | **Kanban board** — backlog, in-progress, done |
+| `01 - Projects/Shelly/Plan - *.md` | Implementation plans for new features |
 
 **Rule:** Before starting work, check the Kanban. After completing work, move the task to ✅ Done.
 
@@ -27,7 +55,7 @@
 - **AI:** OpenAI-compatible API via `async-openai`, structured JSON output
 - **Config:** `confy` → `~/.config/shelly/config.toml`
 - **Skills:** Markdown files in `~/.config/shelly/skills/`, progressive disclosure (metadata only in prompt)
-- **Tools:** `web_search`, `read_file`, `ask_user` (implemented but disabled)
+- **Tools:** `web_search`, `read_file`, `ask_user` (enabled since `56a28fe`)
 
 ### Core Principle: Zero-Leak stdout
 
@@ -51,7 +79,7 @@ Only the final `command` string reaches stdout. Everything else (spinners, reaso
 | `src/tools/mod.rs`                         | `Tool` trait + `ToolRegistry`                   |
 | `src/tools/web_search.rs`                  | DuckDuckGo search tool                          |
 | `src/tools/read_file.rs`                   | File read tool (security scoped)                |
-| `src/tools/ask_user.rs`                    | Interactive clarification (disabled)            |
+| `src/tools/ask_user.rs`                    | Interactive clarification tool                    |
 | `src/skills/mod.rs`                        | `Skill` struct, parsing, discovery, matching    |
 | `src/skills/installer.rs`                  | GitHub download + validation                    |
 | `tests/cli_smoke_test.rs`                  | CLI smoke tests                                 |
@@ -64,7 +92,7 @@ Only the final `command` string reaches stdout. Everything else (spinners, reaso
 ### Before starting a task
 
 1. Read the **Kanban** (`01 - Projects/Shelly/Kanban.md`) for current priorities
-2. Read `docs/usage.md` and `docs/skills.md` for user-facing context
+2. Read `Usage Guide.md` and `Skills Guide.md` in Obsidian for user-facing context
 3. Read `Architecture.md` in Obsidian if the change touches core flows
 4. Run `just test` to establish a green baseline
 
@@ -80,6 +108,7 @@ Only the final `command` string reaches stdout. Everything else (spinners, reaso
 2. `just lint` — clippy clean
 3. Update the **Kanban** — move task to ✅ Done and mark `- [x]`
 4. Update `Changelog.md` if it's a notable feature
+5. Update relevant docs in Obsidian (Usage Guide, Skills Guide, Plans) if the change affects user-facing behavior
 
 ---
 
