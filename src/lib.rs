@@ -1,5 +1,6 @@
 pub mod config;
 pub mod commands;
+pub mod history;
 pub mod skills;
 pub mod tools;
 

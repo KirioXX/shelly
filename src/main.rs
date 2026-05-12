@@ -74,6 +74,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 std::process::exit(1);
             }
         }
+        Commands::History { limit, search, clear, raw } => {
+            if let Err(err) = commands::history::history(limit, search, clear, raw) {
+                eprintln!("Failed to show history: {:?}", err);
+                std::process::exit(1);
+            }
+        }
+        Commands::Undo { index, dry_run } => {
+            if let Err(err) = commands::undo::undo(index, dry_run) {
+                eprintln!("Failed to undo: {:?}", err);
+                std::process::exit(1);
+            }
+        }
     }
     Ok(())
 }

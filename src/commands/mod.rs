@@ -1,7 +1,9 @@
 pub mod ai;
 pub mod config;
+pub mod history;
 pub mod setup;
 pub mod skills;
+pub mod undo;
 
 use clap::{Subcommand};
 use clap_complete::shells;
@@ -38,5 +40,23 @@ pub enum Commands {
         /// Display config without editing
         #[arg(short, long)]
         show: bool,
+    },
+    /// Browse command history
+    History {
+        #[arg(short, long, default_value = "20")]
+        limit: usize,
+        #[arg(short, long)]
+        search: Option<String>,
+        #[arg(long)]
+        clear: bool,
+        #[arg(long)]
+        raw: bool,
+    },
+    /// Replay a previous command
+    Undo {
+        #[arg(short, long, default_value = "0")]
+        index: usize,
+        #[arg(short = 'd', long)]
+        dry_run: bool,
     },
 }
