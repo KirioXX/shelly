@@ -5,6 +5,7 @@ use std::error::Error;
 use console::style;
 
 use indicatif::{ProgressBar, ProgressStyle};
+use crate::history;
 use crate::{APP_NAME, CONFIG_NAME};
 use crate::config::{Config};
 use crate::tools::{ToolRegistry, WebSearch, ReadFile};
@@ -136,7 +137,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
             .build()?
             .into(),
         ChatCompletionRequestUserMessageArgs::default()
-            .content(full_prompt)
+            .content(full_prompt.clone())
             .build()?
             .into(),
     ];
@@ -301,9 +302,17 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
         eprintln!("```");
         eprintln!();
         eprintln!("{}", style("✓ Command generated (not executed)").green().bold());
+        let entry = history::HistoryEntry::new(&full_prompt, &command, &cfg, dry_run);
+        if let Err(e) = history::append(&entry) {
+            eprintln!("{}", style(format!("⚠️  Failed to save to history: {}", e)).yellow());
+        }
         Ok(String::new())  // Return empty so shell doesn't inject
     } else {
         eprintln!("{}", style("✓ Command generated").green().bold());
+        let entry = history::HistoryEntry::new(&full_prompt, &command, &cfg, dry_run);
+        if let Err(e) = history::append(&entry) {
+            eprintln!("{}", style(format!("⚠️  Failed to save to history: {}", e)).yellow());
+        }
         // Command goes to stdout for shell injection, no extra formatting needed
         Ok(command)
     }
