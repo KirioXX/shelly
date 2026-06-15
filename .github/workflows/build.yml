@@ -19,23 +19,28 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set short SHA
+        shell: bash
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --release
 
       - name: Package binary (Unix)
         if: runner.os != 'Windows'
-        run: tar czvf shelly-${{ matrix.os }}.tar.gz -C target/release shelly
+        run: tar czvf shelly-${{ matrix.os }}-${SHORT_SHA}.tar.gz -C target/release shelly
 
       - name: Package binary (Windows)
         if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path target/release/shelly.exe -DestinationPath shelly-${{ matrix.os }}.zip
+          Compress-Archive -Path target/release/shelly.exe -DestinationPath shelly-${{ matrix.os }}-$env:SHORT_SHA.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: shelly-${{ matrix.os }}
           path: |
-            shelly-${{ matrix.os }}.*
+            shelly-${{ matrix.os }}*.*
           if-no-files-found: error
