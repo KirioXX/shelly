@@ -59,14 +59,12 @@ just test     # Run tests
 
 ## Documentation
 
-All documentation lives in the Obsidian vault under `01 - Projects/Shelly/`:
-
-- [[01 - Projects/Shelly/Usage Guide|📖 Usage Guide]] — Complete usage documentation
-- [[01 - Projects/Shelly/0. Index|🏠 Project Hub]] — Quick facts, tech stack, entry points
-- [[01 - Projects/Shelly/Kanban|📋 Kanban Board]] — Current status, backlog, done
-- [[01 - Projects/Shelly/Architecture|🏗️ Architecture]] — Mermaid diagrams, module breakdown
-- [[01 - Projects/Shelly/Changelog|📜 Changelog]] — Feature timeline with commits
-- [[01 - Projects/Shelly/Skills Guide|🎯 Skills]] — Skills system documentation
+- [📖 Usage Guide](docs/USAGE.md) — Complete usage documentation
+- [🏗️ Architecture](docs/ARCHITECTURE.md) — Mermaid diagrams, module breakdown
+- [📜 Changelog](docs/CHANGELOG.md) — Feature timeline with commits
+- [🎯 Skills Guide](docs/SKILLS.md) — Skills system documentation
+- [🗂️ Plans](docs/plans/) — Archived implementation plans
+- 🤖 [AGENT.md](AGENT.md) — Guide for coding agents working on this project
 
 ## Architecture
 
