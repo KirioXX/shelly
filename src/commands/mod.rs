@@ -1,10 +1,10 @@
-pub mod update;
 pub mod ai;
 pub mod config;
 pub mod history;
 pub mod setup;
 pub mod skills;
 pub mod undo;
+pub mod update;
 
 use clap::Subcommand;
 use clap_complete::shells;

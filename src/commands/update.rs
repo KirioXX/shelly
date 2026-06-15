@@ -70,18 +70,18 @@ pub async fn update() -> Result<(), Box<dyn Error>> {
     // Clean up temp dir
     let _ = fs::remove_dir_all(&tmp_dir);
 
-    println!(
-        "{} Updated to {}!",
-        style("✓").green(),
-        style(&tag).bold()
-    );
+    println!("{} Updated to {}!", style("✓").green(), style(&tag).bold());
 
     Ok(())
 }
 
 async fn fetch_latest_release() -> Result<Release, Box<dyn Error>> {
     let client = reqwest::Client::builder()
-        .user_agent(concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION")))
+        .user_agent(concat!(
+            env!("CARGO_PKG_NAME"),
+            "/",
+            env!("CARGO_PKG_VERSION")
+        ))
         .build()?;
 
     let resp = client.get(API_URL).send().await?;
@@ -102,7 +102,11 @@ fn find_asset(release: &Release) -> Result<&Asset, Box<dyn Error>> {
         other => return Err(format!("Unsupported OS: {}", other).into()),
     };
 
-    let ext = if os == "windows-latest" { "zip" } else { "tar.gz" };
+    let ext = if os == "windows-latest" {
+        "zip"
+    } else {
+        "tar.gz"
+    };
 
     let pattern = format!("shelly-{}-{}", os, release.tag_name);
 
@@ -133,7 +137,11 @@ fn find_asset(release: &Release) -> Result<&Asset, Box<dyn Error>> {
 
 async fn download_asset(url: &str, tmp_dir: &Path) -> Result<PathBuf, Box<dyn Error>> {
     let client = reqwest::Client::builder()
-        .user_agent(concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION")))
+        .user_agent(concat!(
+            env!("CARGO_PKG_NAME"),
+            "/",
+            env!("CARGO_PKG_VERSION")
+        ))
         .build()?;
 
     println!("{} Downloading…", style("⬇").cyan());
