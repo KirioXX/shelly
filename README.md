@@ -44,9 +44,15 @@ shelly config --show # Display only, no prompts
 ### Usage
 
 ```bash
+# Without shell wrapper
 shelly generate "list all docker containers"
 shelly generate --dry-run "delete old log files"
 shelly generate --skills safe-bash,backup "archive important files"
+
+# With shell wrapper
+shelly "list all docker containers"
+shelly --dry-run "delete old log files"
+shelly --skills safe-bash,backup "archive important files"
 ```
 
 ## Development
@@ -64,7 +70,7 @@ just test     # Run tests
 - [📜 Changelog](docs/CHANGELOG.md) — Feature timeline with commits
 - [🎯 Skills Guide](docs/SKILLS.md) — Skills system documentation
 - [🗂️ Plans](docs/plans/) — Archived implementation plans
-- 🤖 [AGENT.md](AGENT.md) — Guide for coding agents working on this project
+- [🤖 AGENT.md](AGENT.md) — Guide for coding agents working on this project
 
 ## Architecture
 
