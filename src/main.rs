@@ -16,6 +16,9 @@ struct Cli {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    // Clean up leftover files from a previous Windows self-update
+    commands::update::cleanup_windows_update();
+
     let cli = Cli::parse();
 
     match cli.command {
@@ -81,6 +84,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Commands::Undo { index, dry_run } => {
             if let Err(err) = commands::undo::undo(index, dry_run) {
                 eprintln!("Failed to undo: {:?}", err);
+                std::process::exit(1);
+            }
+        }
+        Commands::Update {} => {
+            if let Err(err) = commands::update::update().await {
+                eprintln!("Failed to update: {:?}", err);
                 std::process::exit(1);
             }
         }

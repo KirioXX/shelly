@@ -28,7 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/KirioXX/shelly/main/scripts/install
 ```
 
 The script downloads the latest release for your OS, extracts it, and places the
-binary in `~/.cargo/bin` (or your chosen directory).
+binary in `~/.local/bin` (or your chosen directory).
 
 #### Windows (PowerShell)
 
@@ -47,9 +47,12 @@ $env:INSTALL_DIR = "C:\Tools"; iwr -useb https://raw.githubusercontent.com/Kirio
 If you prefer to build from source:
 
 ```bash
-# Clone and build
+# Clone then run
+just install
+
+# or completly manual
 cargo build --release
-just install  # Or: cp target/release/shelly ~/.cargo/bin/
+cp target/release/shelly ~/.local/bin/
 ```
 
 ### Setup
@@ -71,6 +74,17 @@ The wizard will:
 shelly config        # View or edit config interactively
 shelly config --show # Display only, no prompts
 ```
+
+### Self-update
+
+Once installed via a release binary, you can update to the latest version with:
+
+```bash
+shelly update
+```
+
+This fetches the latest GitHub release, downloads the matching artifact for your
+platform, and replaces the current binary after confirmation.
 
 ### Usage
 

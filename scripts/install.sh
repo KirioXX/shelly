@@ -130,8 +130,6 @@ extract() {
 install_binary() {
 	if [ -n "${INSTALL_DIR:-}" ]; then
 		INSTALL_DIR="${INSTALL_DIR}"
-	elif [ -d "$HOME/.cargo/bin" ]; then
-		INSTALL_DIR="$HOME/.cargo/bin"
 	elif [ -d "$HOME/.local/bin" ]; then
 		INSTALL_DIR="$HOME/.local/bin"
 	else

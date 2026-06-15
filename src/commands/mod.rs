@@ -1,3 +1,4 @@
+pub mod update;
 pub mod ai;
 pub mod config;
 pub mod history;
@@ -59,4 +60,6 @@ pub enum Commands {
         #[arg(short = 'd', long)]
         dry_run: bool,
     },
+    /// Self-update to the latest release
+    Update {},
 }

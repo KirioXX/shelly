@@ -116,10 +116,8 @@ function Extract-Archive {
 function Install-Binary {
     if ($env:INSTALL_DIR) {
         $script:InstallDir = $env:INSTALL_DIR
-    } elseif ($env:CARGO_HOME) {
-        $script:InstallDir = Join-Path $env:CARGO_HOME "bin"
     } else {
-        $script:InstallDir = Join-Path $env:USERPROFILE ".cargo\bin"
+        $script:InstallDir = Join-Path $env:USERPROFILE ".local\bin"
     }
 
     if (-not (Test-Path $InstallDir)) {
