@@ -27,10 +27,7 @@ jobs:
 
       - name: Package binary (Unix)
         if: runner.os != 'Windows'
-        run: |
-          cd target/release
-          tar czvf ../../../shelly-${{ matrix.os }}.tar.gz shelly
-          cd ../../..
+        run: tar czvf shelly-${{ matrix.os }}.tar.gz -C target/release shelly
 
       - name: Package binary (Windows)
         if: runner.os == 'Windows'
