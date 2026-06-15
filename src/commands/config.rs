@@ -94,7 +94,7 @@ pub fn mask_api_key(key: &str) -> String {
     let len = key.len();
     if len <= 9 {
         let visible = len.saturating_sub(4);
-        let prefix = &key[..visible.max(0)];
+        let prefix = &key[..visible];
         format!("{}{}", prefix, "*".repeat(len - prefix.len()))
     } else {
         let prefix_len = 5.min(len.saturating_sub(4));
