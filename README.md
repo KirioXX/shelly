@@ -15,6 +15,37 @@ A Rust-based terminal assistant that translates natural language prompts into sh
 
 ### Installation
 
+#### macOS / Linux
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/KirioXX/shelly/main/scripts/install.sh | sh
+```
+
+Or specify a custom install directory:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/KirioXX/shelly/main/scripts/install.sh | INSTALL_DIR=/usr/local/bin sh
+```
+
+The script downloads the latest release for your OS, extracts it, and places the
+binary in `~/.cargo/bin` (or your chosen directory).
+
+#### Windows (PowerShell)
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/KirioXX/shelly/main/scripts/install.ps1 | iex
+```
+
+Or with a custom install directory:
+
+```powershell
+$env:INSTALL_DIR = "C:\Tools"; iwr -useb https://raw.githubusercontent.com/KirioXX/shelly/main/scripts/install.ps1 | iex
+```
+
+#### Manual build
+
+If you prefer to build from source:
+
 ```bash
 # Clone and build
 cargo build --release
