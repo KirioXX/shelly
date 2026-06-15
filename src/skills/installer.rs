@@ -64,10 +64,12 @@ impl SkillInstaller {
         let bytes = response.bytes().await?;
 
         // Create temp directory for extraction using std::env::temp_dir()
-        let temp_dir = std::env::temp_dir().join(format!("shelly-skill-{}"
-            , std::time::SystemTime::now()
+        let temp_dir = std::env::temp_dir().join(format!(
+            "shelly-skill-{}",
+            std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)?
-                .as_secs()));
+                .as_secs()
+        ));
         if temp_dir.exists() {
             let _ = std::fs::remove_dir_all(&temp_dir);
         }
@@ -123,7 +125,9 @@ impl SkillInstaller {
             Some(name) => {
                 let found = available_skills
                     .iter()
-                    .find(|(skill_name, _)| skill_name == name || skill_name == &name.replace("-", "_"))
+                    .find(|(skill_name, _)| {
+                        skill_name == name || skill_name == &name.replace("-", "_")
+                    })
                     .cloned();
                 match found {
                     Some(skill) => vec![skill],
@@ -131,7 +135,11 @@ impl SkillInstaller {
                         return Err(format!(
                             "Skill '{}' not found. Available skills: {}",
                             name,
-                            available_skills.iter().map(|(n, _)| n.as_str()).collect::<Vec<_>>().join(", ")
+                            available_skills
+                                .iter()
+                                .map(|(n, _)| n.as_str())
+                                .collect::<Vec<_>>()
+                                .join(", ")
                         )
                         .into());
                     }
@@ -148,7 +156,11 @@ impl SkillInstaller {
             if target_dir.exists() {
                 eprintln!(
                     "{}",
-                    style(format!("⚠️  Skill '{}' already installed, skipping", skill_name)).yellow()
+                    style(format!(
+                        "⚠️  Skill '{}' already installed, skipping",
+                        skill_name
+                    ))
+                    .yellow()
                 );
                 continue;
             }
@@ -203,10 +215,11 @@ impl SkillInstaller {
                 } else {
                     // Check if this directory contains skill subdirectories
                     // but don't recurse into common non-skill directories
-                    let dir_name = path.file_name()
-                        .and_then(|n| n.to_str())
-                        .unwrap_or("");
-                    if !matches!(dir_name, "node_modules" | ".git" | "target" | ".github" | "tests" | "docs") {
+                    let dir_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                    if !matches!(
+                        dir_name,
+                        "node_modules" | ".git" | "target" | ".github" | "tests" | "docs"
+                    ) {
                         self.find_skills_in_dir(&path, skills)?;
                     }
                 }
@@ -245,7 +258,8 @@ impl SkillInstaller {
         }
 
         // Fallback: use directory name
-        Ok(path.parent()
+        Ok(path
+            .parent()
             .and_then(|p| p.file_name())
             .and_then(|n| n.to_str())
             .map(|s| s.to_string()))

@@ -18,7 +18,7 @@
 // 2. Implement for real client and mock client:
 // mock! {
 //     pub ChatClient {}
-//     
+//
 //     #[async_trait]
 //     impl ChatClient for ChatClient {
 //         async fn create_chat_completion(

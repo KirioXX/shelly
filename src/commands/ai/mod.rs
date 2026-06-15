@@ -4,30 +4,21 @@ use std::error::Error;
 
 use console::style;
 
-use indicatif::{ProgressBar, ProgressStyle};
+use crate::config::Config;
 use crate::history;
-use crate::{APP_NAME, CONFIG_NAME};
-use crate::config::{Config};
-use crate::tools::{ToolRegistry, WebSearch, ReadFile};
 #[allow(unused_imports)]
 use crate::tools::AskUser;
+use crate::tools::{ReadFile, ToolRegistry, WebSearch};
+use crate::{APP_NAME, CONFIG_NAME};
 use async_openai::types::chat::{
-    ChatCompletionRequestAssistantMessageArgs,
-    ChatCompletionRequestMessage,
-    ChatCompletionRequestSystemMessageArgs,
-    ChatCompletionRequestToolMessageArgs,
-    ChatCompletionRequestUserMessageArgs,
-    ChatCompletionToolChoiceOption,
-    ChatCompletionMessageToolCalls,
-    CreateChatCompletionRequestArgs,
-    ResponseFormat,
-    ResponseFormatJsonSchema,
-    ToolChoiceOptions,
+    ChatCompletionMessageToolCalls, ChatCompletionRequestAssistantMessageArgs,
+    ChatCompletionRequestMessage, ChatCompletionRequestSystemMessageArgs,
+    ChatCompletionRequestToolMessageArgs, ChatCompletionRequestUserMessageArgs,
+    ChatCompletionToolChoiceOption, CreateChatCompletionRequestArgs, ResponseFormat,
+    ResponseFormatJsonSchema, ToolChoiceOptions,
 };
-use async_openai::{
-    config::OpenAIConfig,
-    Client,
-};
+use async_openai::{Client, config::OpenAIConfig};
+use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -97,8 +88,8 @@ fn build_schema() -> Value {
     })
 }
 
-fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig>{
-  Client::with_config(
+fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig> {
+    Client::with_config(
         OpenAIConfig::new()
             .with_api_key(api_key)
             .with_api_base(api_base),
@@ -113,7 +104,11 @@ fn create_tool_registry() -> ToolRegistry {
     registry
 }
 
-pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) -> Result<String, Box<dyn Error>> {
+pub async fn call(
+    prompt: Vec<String>,
+    dry_run: bool,
+    skills: Option<String>,
+) -> Result<String, Box<dyn Error>> {
     let cfg: Config = confy::load(APP_NAME, CONFIG_NAME)?;
 
     if cfg.api_key.is_empty() {
@@ -167,7 +162,9 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
                 .model(cfg.model.clone())
                 .messages(messages.clone())
                 .tools(tools.clone())
-                .tool_choice(ChatCompletionToolChoiceOption::Mode(ToolChoiceOptions::Auto))
+                .tool_choice(ChatCompletionToolChoiceOption::Mode(
+                    ToolChoiceOptions::Auto,
+                ))
                 .response_format(ResponseFormat::JsonSchema {
                     json_schema: ResponseFormatJsonSchema {
                         description: Some("Shell command with optional warning".to_string()),
@@ -212,10 +209,13 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
         if let Some(tool_calls) = &choice.message.tool_calls {
             if !tool_calls.is_empty() && tool_calls_count < max_tool_calls {
                 // Collect function tool calls only
-                let function_tool_calls: Vec<_> = tool_calls.iter().filter_map(|tc| match tc {
-                    ChatCompletionMessageToolCalls::Function(fc) => Some(fc.clone()),
-                    _ => None,
-                }).collect();
+                let function_tool_calls: Vec<_> = tool_calls
+                    .iter()
+                    .filter_map(|tc| match tc {
+                        ChatCompletionMessageToolCalls::Function(fc) => Some(fc.clone()),
+                        _ => None,
+                    })
+                    .collect();
 
                 if !function_tool_calls.is_empty() {
                     // AI wants to call tools
@@ -257,7 +257,7 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
                                 .content(result)
                                 .tool_call_id(tool_call.id.clone())
                                 .build()?
-                                .into()
+                                .into(),
                         );
                     }
                     continue;
@@ -292,7 +292,12 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
     if let Some(warning) = parsed.warning
         && !warning.trim().is_empty()
     {
-        eprintln!("{}", style(format!("⚠️  Warning: {}", warning.trim())).red().bold());
+        eprintln!(
+            "{}",
+            style(format!("⚠️  Warning: {}", warning.trim()))
+                .red()
+                .bold()
+        );
     }
 
     if dry_run {
@@ -301,17 +306,26 @@ pub async fn call(prompt: Vec<String>, dry_run: bool, skills: Option<String>) ->
         eprintln!("{}", style(&command).cyan());
         eprintln!("```");
         eprintln!();
-        eprintln!("{}", style("✓ Command generated (not executed)").green().bold());
+        eprintln!(
+            "{}",
+            style("✓ Command generated (not executed)").green().bold()
+        );
         let entry = history::HistoryEntry::new(&full_prompt, &command, &cfg, dry_run);
         if let Err(e) = history::append(&entry) {
-            eprintln!("{}", style(format!("⚠️  Failed to save to history: {}", e)).yellow());
+            eprintln!(
+                "{}",
+                style(format!("⚠️  Failed to save to history: {}", e)).yellow()
+            );
         }
-        Ok(String::new())  // Return empty so shell doesn't inject
+        Ok(String::new()) // Return empty so shell doesn't inject
     } else {
         eprintln!("{}", style("✓ Command generated").green().bold());
         let entry = history::HistoryEntry::new(&full_prompt, &command, &cfg, dry_run);
         if let Err(e) = history::append(&entry) {
-            eprintln!("{}", style(format!("⚠️  Failed to save to history: {}", e)).yellow());
+            eprintln!(
+                "{}",
+                style(format!("⚠️  Failed to save to history: {}", e)).yellow()
+            );
         }
         // Command goes to stdout for shell injection, no extra formatting needed
         Ok(command)
@@ -324,7 +338,8 @@ mod tests {
 
     #[test]
     fn test_parse_json_command_with_warning() {
-        let result = parse_ai_response(r#"{"command": "rm -rf /", "warning": "dangerous"}"#).unwrap();
+        let result =
+            parse_ai_response(r#"{"command": "rm -rf /", "warning": "dangerous"}"#).unwrap();
         assert_eq!(result.command, "rm -rf /");
         assert_eq!(result.warning, Some("dangerous".to_string()));
     }
@@ -395,10 +410,7 @@ Enjoy!"#;
 
     #[test]
     fn test_strip_json_fence() {
-        assert_eq!(
-            strip_markdown_fences("```json\nfoo\n```"),
-            "foo"
-        );
+        assert_eq!(strip_markdown_fences("```json\nfoo\n```"), "foo");
     }
 
     #[test]
@@ -419,14 +431,23 @@ Enjoy!"#;
 
     #[test]
     fn test_strip_text_before_fence() {
-        assert_eq!(strip_markdown_fences("intro\n```json\ncontent\n```\noutro"), "content");
+        assert_eq!(
+            strip_markdown_fences("intro\n```json\ncontent\n```\noutro"),
+            "content"
+        );
     }
 
     #[test]
     fn test_schema_requires_nullable_warning() {
         let schema = build_schema();
-        assert_eq!(schema["required"], serde_json::json!(["command", "warning"]));
-        assert_eq!(schema["properties"]["warning"]["type"], serde_json::json!(["string", "null"]));
+        assert_eq!(
+            schema["required"],
+            serde_json::json!(["command", "warning"])
+        );
+        assert_eq!(
+            schema["properties"]["warning"]["type"],
+            serde_json::json!(["string", "null"])
+        );
         assert!(schema["properties"]["command"]["description"].is_string());
         assert!(schema["properties"]["warning"]["description"].is_string());
     }

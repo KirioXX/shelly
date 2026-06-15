@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use dialoguer::{console::Style, theme::ColorfulTheme, Confirm};
+use dialoguer::{Confirm, console::Style, theme::ColorfulTheme};
 
 use crate::history;
 

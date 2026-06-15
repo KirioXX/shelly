@@ -1,6 +1,6 @@
 use std::error::Error;
-use std::fs::{OpenOptions};
-use std::io::{Write};
+use std::fs::OpenOptions;
+use std::io::Write;
 
 use dialoguer::{Confirm, Input, Password, Select, console::Style, theme::ColorfulTheme};
 
@@ -76,7 +76,10 @@ pub fn setup() -> Result<Option<Config>, Box<dyn Error>> {
     println!("\nProposed shell wrapper:\n{}", wrapper);
 
     if Confirm::with_theme(&theme)
-        .with_prompt(format!("Would you like to add this to your {:?}?", config_file))
+        .with_prompt(format!(
+            "Would you like to add this to your {:?}?",
+            config_file
+        ))
         .interact()?
     {
         let mut file = OpenOptions::new()

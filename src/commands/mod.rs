@@ -5,7 +5,7 @@ pub mod setup;
 pub mod skills;
 pub mod undo;
 
-use clap::{Subcommand};
+use clap::Subcommand;
 use clap_complete::shells;
 
 use crate::commands::skills::SkillsCommands;
@@ -21,7 +21,7 @@ pub enum Commands {
 
         #[arg(short = 'd', long, help = "Show command without executing")]
         dry_run: bool,
-        
+
         #[arg(long, help = "Comma-separated list of skills to use")]
         skills: Option<String>,
     },

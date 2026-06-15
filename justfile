@@ -16,6 +16,10 @@ install: build
 check:
     cargo check
 
+# Format all code
+fmt:
+    cargo fmt
+
 # Run clippy
 lint:
     cargo clippy -- -D warnings

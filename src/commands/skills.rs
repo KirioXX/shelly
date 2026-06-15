@@ -1,7 +1,7 @@
 use crate::skills::SkillManager;
+use clap::Subcommand;
 use console::style;
 use std::error::Error;
-use clap::{Subcommand};
 
 #[derive(Debug, Subcommand)]
 pub enum SkillsCommands {
@@ -54,7 +54,10 @@ pub async fn add(url: String, specific_skill: Option<String>) -> Result<(), Box<
         style(format!("Attempting to install from: {}", url)).dim()
     );
 
-    match manager.install_from_url(&url, specific_skill.as_deref()).await {
+    match manager
+        .install_from_url(&url, specific_skill.as_deref())
+        .await
+    {
         Ok(installed) => {
             if installed.is_empty() {
                 println!("\n{}", style("No skills were installed.").yellow());
@@ -68,9 +71,12 @@ pub async fn add(url: String, specific_skill: Option<String>) -> Result<(), Box<
             } else {
                 println!(
                     "\n{}",
-                    style(format!("✓ Successfully installed {} skills:", installed.len()))
-                        .green()
-                        .bold()
+                    style(format!(
+                        "✓ Successfully installed {} skills:",
+                        installed.len()
+                    ))
+                    .green()
+                    .bold()
                 );
                 for name in &installed {
                     println!("    • {}", style(name).cyan());

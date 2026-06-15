@@ -1,12 +1,12 @@
-use serde_derive::{Serialize, Deserialize};
-use clap::{ValueEnum};
+use clap::ValueEnum;
+use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Debug, Serialize, Deserialize, Clone, ValueEnum)]
 pub enum Shell {
-  Bash,
-  Zsh,
-  Fish
+    Bash,
+    Zsh,
+    Fish,
 }
 
 impl fmt::Display for Shell {
@@ -28,7 +28,14 @@ pub struct Config {
 }
 
 impl ::std::default::Default for Config {
-    fn default() -> Self { Self { model: "".into(), api_url: "".into(), api_key: "".into(), shell: None } }
+    fn default() -> Self {
+        Self {
+            model: "".into(),
+            api_url: "".into(),
+            api_key: "".into(),
+            shell: None,
+        }
+    }
 }
 
 #[cfg(test)]
