@@ -30,6 +30,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Ok(None) => println!("Setup cancelled."),
             Err(_err) => eprintln!("Setup failed"),
         },
+        Commands::Explain { command } => {
+            if let Err(err) = commands::explain::explain(command).await {
+                eprintln!("Failed to explain: {:?}", err);
+                std::process::exit(1);
+            }
+        }
         Commands::Generate {
             prompt,
             dry_run,

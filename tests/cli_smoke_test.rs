@@ -16,6 +16,23 @@ fn test_cli_help() {
     assert!(stdout.contains("Commands:"), "Help should list commands");
 }
 
+/// Test that explain --help works (smoke test)
+#[test]
+fn test_cli_explain_help() {
+    let output = Command::new("cargo")
+        .args(["run", "--quiet", "--", "explain", "--help"])
+        .output()
+        .expect("Failed to execute command");
+
+    assert!(output.status.success(), "explain --help should succeed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("command"),
+        "explain help should mention command argument; got:\n{}",
+        stdout
+    );
+}
+
 /// Test that cmds subcommand lists commands
 #[test]
 fn test_cli_cmds_subcommand() {
@@ -28,6 +45,7 @@ fn test_cli_cmds_subcommand() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("setup"), "cmds should list setup");
     assert!(stdout.contains("generate"), "cmds should list generate");
+    assert!(stdout.contains("explain"), "cmds should list explain");
 }
 
 /// Test that version works

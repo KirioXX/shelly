@@ -1,3 +1,4 @@
+pub mod explain;
 pub mod ai;
 pub mod config;
 pub mod history;
@@ -15,6 +16,11 @@ use crate::commands::skills::SkillsCommands;
 pub enum Commands {
     /// Run the setup wizard
     Setup {},
+    /// Explain a shell command in plain English
+    Explain {
+        #[arg(trailing_var_arg = true)]
+        command: Vec<String>,
+    },
     /// Generate shell commands from natural language
     Generate {
         #[arg(trailing_var_arg = true)]

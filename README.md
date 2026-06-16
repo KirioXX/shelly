@@ -94,6 +94,9 @@ shelly generate "list all docker containers"
 shelly generate --dry-run "delete old log files"
 shelly generate --skills safe-bash,backup "archive important files"
 
+# Explain a command you don't understand
+shelly explain "find . -name '*.rs' -exec rm {} \\;"
+
 # With shell wrapper
 shelly "list all docker containers"
 shelly --dry-run "delete old log files"
