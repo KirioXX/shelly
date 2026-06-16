@@ -9,6 +9,9 @@ tags: [changelog, history, timeline]
 ## 2026-06
 
 ### 2026-06-15
+- **Fix** — Self-update: strip macOS quarantine attributes from downloaded binaries and add architecture mismatch detection with detailed diagnostics (`51270b2`)
+- **Feature** — `shelly explain <command>` — Explain any shell command in plain English using the configured AI (`5dcae25`)
+- **Feature** — Full tool support in `explain`: `web_search`, `read_file`, and `ask_user` available during command analysis (`294e46b`)
 - **CI** — Artifact naming: build artifacts include commit SHA, release artifacts include version tag (`9c0ce71`)
 - **CI** — Fix artifact upload path on Unix: `tar -C target/release` so archives are created in the repo root (`22a3cd6`)
 - **CI** — Add release workflow with binary artifacts: `build.yml` uploads artifacts, `release.yml` triggered by `v*` tags creates draft releases (`2e51244`)
