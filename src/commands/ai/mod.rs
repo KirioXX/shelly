@@ -5,10 +5,9 @@ use std::error::Error;
 use console::style;
 
 use crate::config::Config;
-use crate::history;
+use crate::{ai_utils, history};
 #[allow(unused_imports)]
 use crate::tools::AskUser;
-use crate::tools::{ReadFile, ToolRegistry, WebSearch};
 use crate::{APP_NAME, CONFIG_NAME};
 use async_openai::types::chat::{
     ChatCompletionMessageToolCalls, ChatCompletionRequestAssistantMessageArgs,
@@ -17,7 +16,6 @@ use async_openai::types::chat::{
     ChatCompletionToolChoiceOption, CreateChatCompletionRequestArgs, ResponseFormat,
     ResponseFormatJsonSchema, ToolChoiceOptions,
 };
-use async_openai::{Client, config::OpenAIConfig};
 use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use serde_json::Value;
@@ -88,22 +86,6 @@ fn build_schema() -> Value {
     })
 }
 
-fn get_client(api_key: &str, api_base: &str) -> Client<OpenAIConfig> {
-    Client::with_config(
-        OpenAIConfig::new()
-            .with_api_key(api_key)
-            .with_api_base(api_base),
-    )
-}
-
-fn create_tool_registry() -> ToolRegistry {
-    let mut registry = ToolRegistry::new();
-    registry.register(WebSearch);
-    registry.register(ReadFile);
-    registry.register(AskUser);
-    registry
-}
-
 pub async fn call(
     prompt: Vec<String>,
     dry_run: bool,
@@ -121,8 +103,8 @@ pub async fn call(
         Err(_err) => "".to_string(),
     };
 
-    let client = get_client(&cfg.api_key, &cfg.api_url);
-    let registry = create_tool_registry();
+    let client = ai_utils::get_client(&cfg.api_key, &cfg.api_url);
+    let registry = ai_utils::create_tool_registry();
     let tools = registry.to_function_definitions();
 
     // Build initial messages
@@ -382,7 +364,7 @@ mod tests {
 
 ```json
 
-  {"command": "pwd", "warning": null}  
+  {"command": "pwd", "warning": null}
 
 ```
 

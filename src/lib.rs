@@ -1,3 +1,4 @@
+pub mod ai_utils;
 pub mod commands;
 pub mod config;
 pub mod history;
