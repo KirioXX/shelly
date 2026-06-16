@@ -5,10 +5,10 @@ use std::error::Error;
 use console::style;
 
 use crate::config::Config;
-use crate::{ai_utils, history};
 #[allow(unused_imports)]
 use crate::tools::AskUser;
 use crate::{APP_NAME, CONFIG_NAME};
+use crate::{ai_utils, history};
 use async_openai::types::chat::{
     ChatCompletionMessageToolCalls, ChatCompletionRequestAssistantMessageArgs,
     ChatCompletionRequestMessage, ChatCompletionRequestSystemMessageArgs,

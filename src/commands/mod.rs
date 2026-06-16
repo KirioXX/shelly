@@ -1,6 +1,6 @@
-pub mod explain;
 pub mod ai;
 pub mod config;
+pub mod explain;
 pub mod history;
 pub mod setup;
 pub mod skills;
