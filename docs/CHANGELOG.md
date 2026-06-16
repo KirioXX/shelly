@@ -19,6 +19,9 @@ tags: [changelog, history, timeline]
 - **Feature** — Self-update command: `shelly update` fetches latest release, confirms, downloads matching artifact, extracts, and replaces the running binary with rollback on failure (`e82efcb`)
 - **Build** — Add `build.rs` to embed short Git SHA at compile time; add `json` feature to `reqwest`
 - **Docs** — README: one-liner install instructions for both platforms; `shelly update` documentation
+- **Feature** — `shelly explain <command>` — Explain any shell command in plain English using the configured AI (`5dcae25`)
+- **Feature** — Full tool support in `explain`: `web_search`, `read_file`, and `ask_user` available during command analysis (`294e46b`)
+- **Fix** — Correct format issues (`4a3a266`)
 
 ## 2026-05
 
