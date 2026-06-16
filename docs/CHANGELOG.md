@@ -6,6 +6,20 @@ tags: [changelog, history, timeline]
 
 # 📜 Shelly Changelog
 
+## 2026-06
+
+### 2026-06-15
+- **CI** — Artifact naming: build artifacts include commit SHA, release artifacts include version tag (`9c0ce71`)
+- **CI** — Fix artifact upload path on Unix: `tar -C target/release` so archives are created in the repo root (`22a3cd6`)
+- **CI** — Add release workflow with binary artifacts: `build.yml` uploads artifacts, `release.yml` triggered by `v*` tags creates draft releases (`2e51244`)
+- **Feature** — Install scripts for easy one-liner setup:
+  - `scripts/install.sh` for macOS/Linux (`curl ... | sh`)
+  - `scripts/install.ps1` for Windows (`iwr ... | iex`)
+  - Default install dir: `~/.local/bin` / `%USERPROFILE%\.local\bin` (`9146166`)
+- **Feature** — Self-update command: `shelly update` fetches latest release, confirms, downloads matching artifact, extracts, and replaces the running binary with rollback on failure (`e82efcb`)
+- **Build** — Add `build.rs` to embed short Git SHA at compile time; add `json` feature to `reqwest`
+- **Docs** — README: one-liner install instructions for both platforms; `shelly update` documentation
+
 ## 2026-05
 
 ### 2026-05-12
