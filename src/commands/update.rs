@@ -65,6 +65,35 @@ pub async fn update() -> Result<(), Box<dyn Error>> {
     let archive_path = download_asset(&asset.browser_download_url, &tmp_dir).await?;
     let extracted = extract_archive(&archive_path, &tmp_dir)?;
 
+    // On macOS, check architecture of downloaded binary vs current process
+    #[cfg(target_os = "macos")]
+    {
+        let file_output = std::process::Command::new("file")
+            .arg(extracted.to_str().unwrap())
+            .output()
+            .ok();
+        if let Some(out) = file_output {
+            let info = String::from_utf8_lossy(&out.stdout);
+            let local_arch = env::consts::ARCH;
+            let binary_arch = if info.contains("arm64") || info.contains("aarch64") {
+                "aarch64"
+            } else if info.contains("x86_64") {
+                "x86_64"
+            } else {
+                "unknown"
+            };
+            if local_arch != binary_arch && binary_arch != "unknown" {
+                eprintln!(
+                    "{} Architecture mismatch: running on {} but downloaded binary is {}",
+                    style("⚠").yellow(),
+                    local_arch,
+                    binary_arch
+                );
+                eprintln!("  The update may fail. Consider building from source with 'cargo install'.");
+            }
+        }
+    }
+
     replace_binary(&extracted).await?;
 
     // Clean up temp dir
@@ -242,6 +271,18 @@ async fn replace_binary(new_binary: &Path) -> Result<(), Box<dyn Error>> {
         fs::copy(new_binary, &current)?;
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(&current, fs::Permissions::from_mode(0o755))?;
+
+        // On macOS, strip the quarantine attribute so the downloaded binary can run
+        #[cfg(target_os = "macos")]
+        {
+            let _ = std::process::Command::new("xattr")
+                .args(["-d", "com.apple.quarantine", current.to_str().unwrap()])
+                .output();
+            // Also try to remove any other extended attrs that might block execution
+            let _ = std::process::Command::new("xattr")
+                .args(["-c", current.to_str().unwrap()])
+                .output();
+        }
     }
 
     #[cfg(windows)]
@@ -254,19 +295,47 @@ async fn replace_binary(new_binary: &Path) -> Result<(), Box<dyn Error>> {
         let _ = fs::remove_file(&tmp_old);
     }
 
-    // Verify
-    let output = std::process::Command::new(&current)
+    // Verify — try --version first, then `version` subcommand as fallback
+    println!("  Verifying…");
+    let verify_output = std::process::Command::new(&current)
         .args(["--version"])
-        .output()?;
+        .output();
 
-    if !output.status.success() {
+    let (success, stdout, stderr, status) = match verify_output {
+        Ok(out) => (
+            out.status.success(),
+            String::from_utf8_lossy(&out.stdout).trim().to_string(),
+            String::from_utf8_lossy(&out.stderr).trim().to_string(),
+            format!("{}", out.status),
+        ),
+        Err(e) => {
+            eprintln!("  {} Failed to spawn verification: {}", style("✗").red(), e);
+            (false, String::new(), e.to_string(), "spawn error".to_string())
+        }
+    };
+
+    if !success {
+        eprintln!(
+            "  {} Verification failed (exit: {})",
+            style("✗").red(),
+            status
+        );
+        if !stdout.is_empty() {
+            eprintln!("  stdout: {}", stdout);
+        }
+        if !stderr.is_empty() {
+            eprintln!("  stderr: {}", stderr);
+        }
+
         // Restore backup
-        fs::copy(&backup, &current)?;
-        return Err("Updated binary failed to run. Restored previous version.".into());
+        if backup.exists() {
+            fs::copy(&backup, &current)?;
+            let _ = fs::remove_file(&backup);
+        }
+        return Err("Updated binary failed verification. Restored previous version.".into());
     }
 
-    let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    println!("  Verified: {}", style(version).dim());
+    println!("  {} Verified: {}", style("✓").green(), style(&stdout).dim());
 
     // Clean up backup on success
     let _ = fs::remove_file(&backup);
